@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ASKMITCH — Opening Day Guest List</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Kaushan+Script&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#ED1C24;
+  --red-dark:#B8121A;
+  --black:#0C0C0C;
+  --ink:#161616;
+  --white:#FFFFFF;
+  --off:#F6F3F1;
+  --muted:rgba(255,255,255,.62);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Manrope',sans-serif;
+  background:var(--black);
+  color:var(--white);
+  overflow:hidden;
+  position:fixed;
+  inset:0;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(237,28,36,.22), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 110%, rgba(237,28,36,.14), transparent 60%);
+  pointer-events:none;
+}
+.app{
+  position:relative;
+  height:100dvh;
+  max-width:480px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  padding:0 24px;
+}
+
+/* ---------- header ---------- */
+.top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 0 10px;
+  z-index:5;
+}
+.mark{display:flex;align-items:center;gap:10px}
+.tri{
+  width:34px;height:34px;position:relative;flex:none;
+}
+.tri svg{width:100%;height:100%;display:block}
+.wordmark{line-height:1}
+.wordmark b{
+  font-family:'Anton',sans-serif;font-weight:400;
+  font-size:17px;letter-spacing:.06em;color:var(--white);display:block;
+}
+.wordmark span{
+  font-size:8.5px;letter-spacing:.42em;font-weight:700;color:var(--red);display:block;margin-top:2px;
+}
+.stepcount{
+  font-family:'Anton',sans-serif;font-size:13px;letter-spacing:.12em;
+  color:var(--muted);
+}
+.stepcount em{font-style:normal;color:var(--red)}
+
+/* progress ribbon */
+.ribbon{height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.ribbon i{display:block;height:100%;width:0%;background:var(--red);transition:width .6s cubic-bezier(.65,0,.35,1)}
+
+/* ---------- screens ---------- */
+.stage{position:relative;flex:1;min-height:0}
+.screen{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;justify-content:center;
+  opacity:0;pointer-events:none;
+  transform:translateY(28px);
+  transition:opacity .5s ease,transform .5s cubic-bezier(.22,1,.36,1);
+  padding-bottom:24px;
+}
+.screen.on{opacity:1;pointer-events:auto;transform:translateY(0)}
+.screen.out{opacity:0;transform:translateY(-24px)}
+
+.eyebrow{
+  font-family:'Kaushan Script',cursive;
+  color:var(--red);font-size:clamp(20px,5.6vw,26px);
+  margin-bottom:10px;
+  transform:rotate(-2deg);transform-origin:left;
+}
+.big{
+  font-family:'Anton',sans-serif;font-weight:400;
+  font-size:clamp(34px,9.5vw,46px);
+  line-height:1.04;letter-spacing:.01em;
+  text-transform:uppercase;
+  margin-bottom:14px;
+}
+.big .r{color:var(--red)}
+.sub{color:var(--muted);font-size:15px;line-height:1.65;font-weight:500;max-width:36ch;margin-bottom:28px}
+.sub b{color:var(--white);font-weight:700}
+
+/* staggered entrance */
+.screen .eyebrow,.screen .big,.screen .sub,.screen .field,.screen .grid,.screen .stack,.screen .cta,.screen .fine{
+  opacity:0;transform:translateY(16px);
+  transition:opacity .55s ease,transform .55s cubic-bezier(.22,1,.36,1);
+}
+.screen.on .eyebrow{opacity:1;transform:rotate(-2deg);transition-delay:.05s}
+.screen.on .big{opacity:1;transform:none;transition-delay:.12s}
+.screen.on .sub{opacity:1;transform:none;transition-delay:.2s}
+.screen.on .field,.screen.on .grid,.screen.on .stack{opacity:1;transform:none;transition-delay:.28s}
+.screen.on .cta{opacity:1;transform:none;transition-delay:.36s}
+.screen.on .fine{opacity:1;transform:none;transition-delay:.44s}
+
+/* ---------- inputs ---------- */
+.field input{
+  width:100%;
+  background:rgba(255,255,255,.05);
+  border:1.5px solid rgba(255,255,255,.16);
+  border-radius:14px;
+  padding:17px 18px;
+  color:var(--white);
+  font-family:'Manrope',sans-serif;
+  font-size:17px;font-weight:600;
+  outline:none;
+  transition:border-color .2s,background .2s,box-shadow .2s;
+}
+.field input::placeholder{color:rgba(255,255,255,.32);font-weight:500}
+.field input:focus{border-color:var(--red);background:rgba(237,28,36,.06);box-shadow:0 0 0 4px rgba(237,28,36,.15)}
+.field{margin-bottom:16px}
+.hint{font-size:12.5px;color:rgba(255,255,255,.4);margin-top:9px;font-weight:500}
+.hint.err{color:#FF6B6B}
+
+/* consent */
+.consent{
+  display:flex;gap:11px;align-items:flex-start;
+  font-size:13px;color:var(--muted);line-height:1.55;font-weight:500;
+  margin-bottom:6px;cursor:pointer;user-select:none;
+}
+.consent input{width:19px;height:19px;flex:none;accent-color:var(--red);margin-top:1px;cursor:pointer}
+
+/* ---------- option cards ---------- */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:22px}
+.card{
+  border:1.5px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.04);
+  border-radius:16px;
+  padding:18px 12px 15px;
+  display:flex;flex-direction:column;align-items:center;gap:9px;
+  cursor:pointer;user-select:none;
+  transition:transform .12s ease,border-color .18s,background .18s;
+  text-align:center;
+}
+.card svg{width:27px;height:27px;stroke:rgba(255,255,255,.75);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke .18s}
+.card span{font-size:13.5px;font-weight:700;letter-spacing:.01em}
+.card:active{transform:scale(.955)}
+.card.sel{border-color:var(--red);background:rgba(237,28,36,.13)}
+.card.sel svg{stroke:var(--red)}
+.card.sel span{color:#FF9A9E}
+
+.stack{display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
+.row{
+  border:1.5px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.04);
+  border-radius:14px;
+  padding:16px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;user-select:none;
+  font-size:15px;font-weight:700;
+  transition:transform .12s,border-color .18s,background .18s;
+}
+.row small{font-weight:600;color:rgba(255,255,255,.4);font-size:12.5px;margin-left:10px}
+.row .dot{
+  width:20px;height:20px;border-radius:50%;flex:none;
+  border:2px solid rgba(255,255,255,.3);
+  transition:border-color .15s,background .15s,box-shadow .15s;
+}
+.row:active{transform:scale(.98)}
+.row.sel{border-color:var(--red);background:rgba(237,28,36,.12)}
+.row.sel .dot{border-color:var(--red);background:var(--red);box-shadow:inset 0 0 0 4px var(--black)}
+
+/* ---------- buttons ---------- */
+.cta{
+  width:100%;
+  background:var(--red);
+  color:var(--white);
+  border:none;border-radius:14px;
+  font-family:'Anton',sans-serif;font-weight:400;
+  font-size:17px;letter-spacing:.09em;text-transform:uppercase;
+  padding:18px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:transform .12s,background .18s,opacity .2s;
+}
+.cta:active{transform:scale(.975)}
+.cta:hover{background:var(--red-dark)}
+.cta[disabled]{opacity:.35;pointer-events:none}
+.cta.ghost{background:transparent;border:1.5px solid rgba(255,255,255,.25);font-size:14px;padding:14px}
+.cta svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.fine{font-size:12px;color:rgba(255,255,255,.38);margin-top:14px;text-align:center;font-weight:500}
+
+.back{
+  position:absolute;top:-2px;left:0;
+  background:none;border:none;color:rgba(255,255,255,.45);
+  font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;
+  display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 8px 8px 0;
+  z-index:6;
+}
+.back svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- welcome specifics ---------- */
+.badge{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid rgba(237,28,36,.5);
+  background:rgba(237,28,36,.1);
+  color:#FF8A8E;
+  border-radius:999px;
+  font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  padding:8px 15px;margin-bottom:20px;
+  width:fit-content;
+}
+.badge i{width:6px;height:6px;border-radius:50%;background:var(--red);display:block;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.meta{display:flex;gap:22px;margin-bottom:30px}
+.meta div{font-size:12.5px;color:var(--muted);font-weight:600;line-height:1.5}
+.meta b{display:block;color:var(--white);font-size:13.5px;font-weight:800}
+
+/* ---------- voucher ---------- */
+.voucher{
+  border:2px dashed rgba(237,28,36,.65);
+  background:rgba(237,28,36,.07);
+  border-radius:18px;
+  padding:24px 20px;
+  text-align:center;
+  margin-bottom:14px;
+  position:relative;
+  transform:scale(.85);opacity:0;
+  transition:transform .6s cubic-bezier(.34,1.56,.64,1),opacity .5s ease;
+}
+.voucher.pop{transform:scale(1);opacity:1}
+.voucher small{font-size:11px;letter-spacing:.3em;font-weight:800;color:#FF8A8E;text-transform:uppercase;display:block;margin-bottom:10px}
+.voucher .code{
+  font-family:'Anton',sans-serif;font-size:clamp(28px,8vw,36px);
+  letter-spacing:.12em;color:var(--white);
+}
+.voucher .pct{
+  position:absolute;top:-16px;right:14px;
+  background:var(--red);color:var(--white);
+  font-family:'Anton',sans-serif;font-size:14px;letter-spacing:.05em;
+  padding:7px 13px;border-radius:999px;
+  transform:rotate(4deg);
+}
+.copybtn{
+  background:none;border:none;color:#FF8A8E;font-family:'Manrope',sans-serif;
+  font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:6px 10px;
+}
+.copybtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+
+@media (max-height:700px){
+  .big{font-size:clamp(28px,8vw,38px)}
+  .sub{margin-bottom:20px}
+  .card{padding:14px 10px 12px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="top">
+    <div class="mark">
+      <div class="tri">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="#1E1E1E" stroke-width="9" stroke-dasharray="188 63" stroke-dashoffset="-30" transform="rotate(-90 50 50)"/>
+          <path d="M50 18 L78 74 L61 74 L50 51 L39 74 L22 74 Z" fill="#ED1C24"/>
+        </svg>
+      </div>
+      <div class="wordmark"><b>ASKMITCH</b><span>MULTI-VENTURES</span></div>
+    </div>
+    <div class="stepcount" id="stepcount"></div>
+  </div>
+  <div class="ribbon"><i id="prog"></i></div>
+
+  <div class="stage" id="stage">
+
+    <!-- 0 · WELCOME -->
+    <section class="screen" data-s="0">
+      <div class="badge"><i></i>Opening day · Ibadan</div>
+      <div class="eyebrow">Shop and Chop!</div>
+      <h1 class="big">Welcome to the <span class="r">ASKMITCH</span> guest list</h1>
+      <p class="sub">You made it to the party — now let's make it official. <b>60 seconds</b>, a few quick questions, and a <b>5% voucher</b> lands in your hands.</p>
+      <div class="meta">
+        <div><b>Sat, 8th August</b>Sims Plaza, Apata Rd</div>
+        <div><b>Shop · Eat · Drink</b>and mingle!!!</div>
+      </div>
+      <button class="cta" onclick="go(1)">Let's go
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <p class="fine">Tech, Style, Askmitch Anything…</p>
+    </section>
+
+    <!-- 1 · NAME -->
+    <section class="screen" data-s="1">
+      <button class="back" onclick="go(0)"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>Back</button>
+      <div class="eyebrow">First things first…</div>
+      <h1 class="big">Who's on the <span class="r">guest list?</span></h1>
+      <p class="sub">Every VIP has a name. What should we call you?</p>
+      <div class="field">
+        <input type="text" id="f-name" placeholder="Your full name" autocomplete="name">
+        <div class="hint" id="h-name">This goes on your voucher</div>
+      </div>
+      <button class="cta" onclick="checkName()">That's me
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </section>
+
+    <!-- 2 · EMAIL -->
+    <section class="screen" data-s="2">
+      <button class="back" onclick="go(1)"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>Back</button>
+      <div class="eyebrow">Nice to meet you<span id="nm-echo"></span>!</div>
+      <h1 class="big">Where do we send your <span class="r">5% voucher?</span></h1>
+      <p class="sub">Your code drops in your inbox the second you finish. No spam — just deals worth opening.</p>
+      <div class="field">
+        <input type="email" id="f-email" placeholder="name@email.com" autocomplete="email" inputmode="email">
+        <div class="hint" id="h-email">We'll email your voucher code here</div>
+      </div>
+      <button class="cta" onclick="checkEmail()">Lock it in
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </section>
+
+    <!-- 3 · WHATSAPP -->
+    <section class="screen" data-s="3">
+      <button class="back" onclick="go(2)"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>Back</button>
+      <div class="eyebrow">Deals move fast here…</div>
+      <h1 class="big">Drop your <span class="r">WhatsApp</span></h1>
+      <p class="sub">Flash deals, restock alerts, swap offers — the good stuff goes to WhatsApp first.</p>
+      <div class="field">
+        <input type="tel" id="f-phone" placeholder="0801 234 5678" autocomplete="tel" inputmode="tel">
+        <div class="hint" id="h-phone">Optional — but you'll want the flash deals</div>
+      </div>
+      <label class="consent">
+        <input type="checkbox" id="f-consent" checked>
+        <span>Keep me posted on offers and updates from ASKMITCH. Unsubscribe anytime.</span>
+      </label>
+      <div style="height:16px"></div>
+      <button class="cta" onclick="go(4)">Continue
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </section>
+
+    <!-- 4 · GADGET -->
+    <section class="screen" data-s="4">
+      <button class="back" onclick="go(3)"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>Back</button>
+      <div class="eyebrow">Real talk…</div>
+      <h1 class="big">Which gadget is <span class="r">calling you</span> right now?</h1>
+      <p class="sub">Pick the one you're most likely to buy next — we'll make sure it's waiting for you.</p>
+      <div class="grid" id="g-gadget">
+        <div class="card" data-v="iphone" onclick="pick(this,'gadget')">
+          <svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.5 5h3"/></svg>
+          <span>iPhone</span>
+        </div>
+        <div class="card" data-v="samsung" onclick="pick(this,'gadget')">
+          <svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><circle cx="12" cy="18" r="1"/></svg>
+          <span>Samsung</span>
+        </div>
+        <div class="card" data-v="laptop" onclick="pick(this,'gadget')">
+          <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></svg>
+          <span>Laptop</span>
+        </div>
+        <div class="card" data-v="audio" onclick="pick(this,'gadget')">
+          <svg viewBox="0 0 24 24"><path d="M4 13a8 8 0 0 1 16 0"/><rect x="3" y="13" width="4" height="7" rx="1.5"/><rect x="17" y="13" width="4" height="7" rx="1.5"/></svg>
+          <span>Audio &amp; speakers</span>
+        </div>
+        <div class="card" data-v="watch" onclick="pick(this,'gadget')">
+          <svg viewBox="0 0 24 24"><rect x="7" y="6.5" width="10" height="11" rx="3"/><path d="M9 6.5V3h6v3.5M9 17.5V21h6v-3.5"/></svg>
+          <span>Smartwatch</span>
+        </div>
+        <div class="card" data-v="gaming" onclick="pick(this,'gadget')">
+          <svg viewBox="0 0 24 24"><path d="M6 9h12a4 4 0 0 1 4 4v2a3 3 0 0 1-5.5 1.7L15 15H9l-1.5 1.7A3 3 0 0 1 2 15v-2a4 4 0 0 1 4-4Z"/><path d="M7.5 12.5h3M9 11v3"/></svg>
+          <span>Gaming</span>
+        </div>
+      </div>
+      <button class="cta" id="b-gadget" disabled onclick="go(5)">Noted
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </section>
+
+    <!-- 5 · BUY / SELL / SWAP -->
+    <section class="screen" data-s="5">
+      <button class="back" onclick="go(4)"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>Back</button>
+      <div class="eyebrow">We buy · We sell · We swap</div>
+      <h1 class="big">What's the <span class="r">move?</span></h1>
+      <p class="sub">However you play it, there's a deal for you today.</p>
+      <div class="stack" id="g-move">
+        <div class="row" data-v="buy" onclick="pick(this,'move')"><span>Buying <small>brand new or premium used</small></span><i class="dot"></i></div>
+        <div class="row" data-v="sell" onclick="pick(this,'move')"><span>Selling <small>my current device</small></span><i class="dot"></i></div>
+        <div class="row" data-v="swap" onclick="pick(this,'move')"><span>Swapping <small>trade up to better</small></span><i class="dot"></i></div>
+        <div class="row" data-v="browsing" onclick="pick(this,'move')"><span>Just vibing <small>here for the party</small></span><i class="dot"></i></div>
+      </div>
+      <button class="cta" id="b-move" disabled onclick="go(6)">Continue
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </section>
+
+    <!-- 6 · TIMING -->
+    <section class="screen" data-s="6">
+      <button class="back" onclick="go(5)"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>Back</button>
+      <div class="eyebrow">Last one, promise…</div>
+      <h1 class="big">When are you making it <span class="r">happen?</span></h1>
+      <p class="sub">Be honest — your voucher works either way.</p>
+      <div class="stack" id="g-timing">
+        <div class="row" data-v="today" onclick="pick(this,'timing')"><span>Today <small>while I'm here!</small></span><i class="dot"></i></div>
+        <div class="row" data-v="this_week" onclick="pick(this,'timing')"><span>This week</span><i class="dot"></i></div>
+        <div class="row" data-v="this_month" onclick="pick(this,'timing')"><span>This month</span><i class="dot"></i></div>
+        <div class="row" data-v="someday" onclick="pick(this,'timing')"><span>Someday soon</span><i class="dot"></i></div>
+      </div>
+      <button class="cta" id="b-timing" disabled onclick="finish()">Get my 5% voucher
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </section>
+
+    <!-- 7 · VOUCHER -->
+    <section class="screen" data-s="7">
+      <div class="eyebrow">You're in<span id="nm-echo2"></span>!</div>
+      <h1 class="big">Welcome to the <span class="r">family</span></h1>
+      <p class="sub">Show this at the counter — or find it in your email. Valid for <b>14 days</b>.</p>
+      <div class="voucher" id="voucher">
+        <div class="pct">5% OFF</div>
+        <small>Your voucher code</small>
+        <div class="code" id="vcode">MITCH-XXXXX</div>
+        <button class="copybtn" onclick="copyCode(this)">
+          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+          Copy code
+        </button>
+      </div>
+      <button class="cta ghost" onclick="restart()">Register another guest</button>
+      <p class="fine">Tech, Style, Askmitch Anything…</p>
+    </section>
+
+  </div>
+</div>
+
+<canvas class="confetti" id="cf"></canvas>
+
+<script>
+var cur=0, total=7;
+var answers={};
+var screens=document.querySelectorAll('.screen');
+var labels=['','01 / 05','02 / 05','03 / 05','04 / 05','05 / 05','05 / 05',''];
+
+function render(){
+  screens.forEach(function(s){
+    var n=+s.dataset.s;
+    s.classList.toggle('on',n===cur);
+  });
+  var p = cur===0?0 : cur===7?100 : Math.round((cur/6)*100);
+  document.getElementById('prog').style.width=p+'%';
+  var sc=document.getElementById('stepcount');
+  if(cur>0&&cur<7){var i=cur; sc.innerHTML='<em>0'+i+'</em> / 06';}
+  else sc.innerHTML='';
+}
+function go(n){
+  cur=n; render();
+  setTimeout(function(){
+    var f=document.querySelector('.screen[data-s="'+n+'"] input[type=text],.screen[data-s="'+n+'"] input[type=email],.screen[data-s="'+n+'"] input[type=tel]');
+    if(f&&window.innerWidth>560)f.focus();
+  },550);
+}
+function checkName(){
+  var v=document.getElementById('f-name').value.trim();
+  var h=document.getElementById('h-name');
+  if(v.length<2){h.textContent='We need a name for the guest list';h.classList.add('err');return;}
+  h.classList.remove('err');h.textContent='This goes on your voucher';
+  answers.name=v;
+  var first=v.split(' ')[0];
+  document.getElementById('nm-echo').textContent=', '+first;
+  document.getElementById('nm-echo2').textContent=', '+first;
+  go(2);
+}
+function checkEmail(){
+  var v=document.getElementById('f-email').value.trim();
+  var h=document.getElementById('h-email');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){h.textContent='Hmm, that email doesn\u2019t look right \u2014 double-check it';h.classList.add('err');return;}
+  h.classList.remove('err');h.textContent='We\u2019ll email your voucher code here';
+  answers.email=v;
+  go(3);
+}
+function pick(el,key){
+  var sibs=el.parentNode.children;
+  for(var i=0;i<sibs.length;i++)sibs[i].classList.remove('sel');
+  el.classList.add('sel');
+  answers[key]=el.dataset.v;
+  var btn=document.getElementById('b-'+key);
+  if(btn)btn.disabled=false;
+}
+function makeCode(){
+  var chars='ABCDEFGHJKMNPQRSTUVWXYZ23456789',c='';
+  for(var i=0;i<5;i++)c+=chars[Math.floor(Math.random()*chars.length)];
+  return 'MITCH-'+c;
+}
+function finish(){
+  answers.phone=document.getElementById('f-phone').value.trim();
+  answers.consent=document.getElementById('f-consent').checked;
+  answers.code=makeCode();
+  document.getElementById('vcode').textContent=answers.code;
+  go(7);
+  setTimeout(function(){
+    document.getElementById('voucher').classList.add('pop');
+    burst();
+  },500);
+}
+function copyCode(btn){
+  var t=answers.code||document.getElementById('vcode').textContent;
+  if(navigator.clipboard)navigator.clipboard.writeText(t);
+  btn.lastChild.textContent=' Copied!';
+  setTimeout(function(){btn.lastChild.textContent=' Copy code';},1800);
+}
+function restart(){
+  answers={};
+  document.querySelectorAll('input[type=text],input[type=email],input[type=tel]').forEach(function(i){i.value='';});
+  document.querySelectorAll('.card,.row').forEach(function(e){e.classList.remove('sel');});
+  ['b-gadget','b-move','b-timing'].forEach(function(id){document.getElementById(id).disabled=true;});
+  document.getElementById('voucher').classList.remove('pop');
+  go(0);
+}
+
+/* confetti — brand colors */
+var canvas=document.getElementById('cf'),ctx=canvas.getContext('2d'),parts=[];
+function sizeCanvas(){canvas.width=innerWidth;canvas.height=innerHeight;}
+sizeCanvas();addEventListener('resize',sizeCanvas);
+function burst(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  var colors=['#ED1C24','#FFFFFF','#1E1E1E','#FF8A8E'];
+  for(var i=0;i<110;i++){
+    parts.push({
+      x:canvas.width/2+(Math.random()-.5)*160,
+      y:canvas.height*0.32,
+      vx:(Math.random()-.5)*11,
+      vy:-(Math.random()*11+5),
+      w:Math.random()*8+5,
+      h:Math.random()*5+4,
+      r:Math.random()*Math.PI,
+      vr:(Math.random()-.5)*.25,
+      c:colors[Math.floor(Math.random()*colors.length)],
+      life:1
+    });
+  }
+  requestAnimationFrame(tick);
+}
+function tick(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  parts=parts.filter(function(p){return p.life>0&&p.y<canvas.height+30;});
+  parts.forEach(function(p){
+    p.vy+=.32;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.life-=.006;
+    ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);
+    ctx.globalAlpha=Math.max(p.life,0);
+    ctx.fillStyle=p.c;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    ctx.restore();
+  });
+  if(parts.length)requestAnimationFrame(tick);
+}
+
+/* enter key advances on input screens */
+document.getElementById('f-name').addEventListener('keydown',function(e){if(e.key==='Enter')checkName();});
+document.getElementById('f-email').addEventListener('keydown',function(e){if(e.key==='Enter')checkEmail();});
+document.getElementById('f-phone').addEventListener('keydown',function(e){if(e.key==='Enter')go(4);});
+
+render();
+setTimeout(function(){screens[0].classList.add('on');},60);
+</script>
+</body>
+</html>
