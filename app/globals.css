@@ -361,6 +361,44 @@ canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 .pill.warn{border:1.5px solid rgba(255,255,255,.3);color:var(--muted)}
 .pill.err{border:1.5px solid rgba(237,28,36,.55);color:var(--red-soft)}
 
+/* ---------- admin dashboard (/admin) ---------- */
+.ad{
+  position:relative;height:100dvh;overflow-y:auto;
+  max-width:960px;margin:0 auto;padding:0 24px 48px;
+}
+.ad-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 0 16px;flex-wrap:wrap}
+.ad-actions{display:flex;gap:8px;flex-wrap:wrap}
+.ad-btn{
+  display:inline-block;border:1.5px solid rgba(255,255,255,.25);border-radius:10px;
+  background:none;color:var(--white);
+  font-family:var(--font-manrope),sans-serif;font-size:13px;font-weight:800;
+  padding:10px 14px;cursor:pointer;text-decoration:none;
+}
+.ad-btn.primary{background:var(--red);border-color:var(--red)}
+.ad-btn:hover{border-color:rgba(255,255,255,.5)}
+.ad-btn.primary:hover{background:var(--red-dark);border-color:var(--red-dark)}
+.ad-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin-bottom:12px}
+.ad-card{border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);border-radius:16px;padding:18px}
+.ad-kpi{font-family:var(--font-anton),sans-serif;font-size:34px;letter-spacing:.02em;line-height:1}
+.ad-kpi-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:10px}
+.ad-kpi-sub{font-size:12.5px;color:var(--muted);font-weight:600;margin-top:8px}
+.ad-bar-row{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13px;font-weight:600}
+.ad-bar-label{width:118px;flex:none;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ad-track{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}
+.ad-fill{display:block;height:100%;border-radius:4px;background:var(--red)}
+.ad-count{width:36px;text-align:right;flex:none;color:var(--white)}
+.ad-h{font-family:var(--font-anton),sans-serif;font-weight:400;font-size:16px;letter-spacing:.06em;text-transform:uppercase;margin:24px 0 10px}
+.ad-scroll{overflow-x:auto;border:1.5px solid rgba(255,255,255,.1);border-radius:14px}
+.ad-table{width:100%;border-collapse:collapse;font-size:13px}
+.ad-table th{
+  text-align:left;color:var(--muted);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.12);white-space:nowrap;
+}
+.ad-table td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.06);white-space:nowrap}
+.ad-table tr:last-child td{border-bottom:none}
+.ad-empty{color:var(--muted);text-align:center;padding:18px}
+.ad-pager{display:flex;gap:12px;align-items:center;margin-top:14px;font-size:13px;color:var(--muted);font-weight:600}
+
 @media (max-height:700px){
   .big{font-size:clamp(28px,8vw,38px)}
   .sub{margin-bottom:20px}

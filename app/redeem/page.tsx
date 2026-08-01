@@ -6,18 +6,9 @@
 // render distinctly; marking as used is a second, explicit call.
 import { useEffect, useState } from "react";
 import { LogoMark } from "@/components/screens/shared";
+import { GADGET_LABELS } from "@/lib/options";
 
 const PIN_STORAGE_KEY = "askmitch_redeem_pin";
-
-const GADGET_LABELS: Record<string, string> = {
-  iphone: "iPhone",
-  samsung: "Samsung",
-  laptop: "Laptop",
-  audio: "Audio & speakers",
-  watch: "Smartwatch",
-  gaming: "Gaming",
-  other: "Something else",
-};
 
 type RedeemResult =
   | { state: "valid"; name: string; gadget: string; gadget_other: string | null }
@@ -252,7 +243,8 @@ export default function RedeemPage() {
                   Interested in:{" "}
                   {result.gadget === "other" && result.gadget_other
                     ? result.gadget_other
-                    : (GADGET_LABELS[result.gadget] ?? result.gadget)}{" "}
+                    : ((GADGET_LABELS as Record<string, string>)[result.gadget] ??
+                      result.gadget)}{" "}
                   · 5% off
                 </div>
                 <button

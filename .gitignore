@@ -23,3 +23,6 @@ next-env.d.ts
 
 # local audit reports
 lighthouse.json
+
+# owner login bootstrap output — never commit
+.admin-credentials.txt
