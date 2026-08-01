@@ -296,6 +296,71 @@ canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
   outline:2px solid var(--red);outline-offset:2px;
 }
 
+/* ---------- kiosk mode (docs/ARCHITECTURE.md): type ~15% up, 52px targets ---------- */
+.app[data-kiosk]{max-width:560px}
+[data-kiosk] .big{font-size:clamp(39px,10.9vw,53px)}
+[data-kiosk] .eyebrow{font-size:clamp(23px,6.4vw,30px)}
+[data-kiosk] .sub{font-size:17px;max-width:38ch}
+[data-kiosk] .cta{padding:21px;font-size:19px}
+[data-kiosk] .cta.ghost{padding:16px;font-size:16px}
+[data-kiosk] .row{padding:19px 20px;font-size:17px;min-height:52px}
+[data-kiosk] .card{padding:21px 14px 18px}
+[data-kiosk] .card span{font-size:15px}
+[data-kiosk] .field input{padding:19px 20px;font-size:19px}
+[data-kiosk] .back{font-size:15px;padding:12px 12px 12px 0}
+[data-kiosk] .hint{font-size:14px}
+[data-kiosk] .consent{font-size:15px}
+[data-kiosk] .consent input{width:24px;height:24px}
+
+/* "Still there?" inactivity overlay (kiosk) */
+.stillthere{
+  position:fixed;inset:0;z-index:70;
+  background:rgba(12,12,12,.88);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+}
+.stillthere-card{
+  width:100%;max-width:420px;
+  border:1.5px solid rgba(237,28,36,.5);
+  background:var(--ink);
+  border-radius:20px;
+  padding:28px 24px;
+  text-align:left;
+}
+.stillthere-card .sub{margin-bottom:20px}
+
+/* ---------- staff redemption (/redeem) ---------- */
+.rd-stage{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;overflow-y:auto;scrollbar-width:none;padding:24px 0}
+.rd-stage::-webkit-scrollbar{display:none}
+.rd-lock{
+  background:none;border:1.5px solid rgba(255,255,255,.25);border-radius:10px;
+  color:var(--muted);font-family:var(--font-manrope),sans-serif;
+  font-size:12.5px;font-weight:800;letter-spacing:.06em;
+  padding:8px 14px;cursor:pointer;
+}
+.rd-card{
+  border:1.5px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.04);
+  border-radius:16px;
+  padding:20px;
+  margin-top:16px;
+}
+.rd-card .cta{margin-top:16px}
+.rd-name{
+  font-family:var(--font-anton),sans-serif;font-size:24px;letter-spacing:.02em;
+  text-transform:uppercase;margin-top:12px;
+}
+.rd-meta{color:var(--muted);font-size:14px;font-weight:600;margin-top:6px;line-height:1.5}
+.pill{
+  display:inline-block;
+  font-family:var(--font-anton),sans-serif;font-size:12px;letter-spacing:.1em;
+  text-transform:uppercase;
+  padding:6px 13px;border-radius:999px;
+}
+.pill.ok{background:var(--red);color:var(--white)}
+.pill.warn{border:1.5px solid rgba(255,255,255,.3);color:var(--muted)}
+.pill.err{border:1.5px solid rgba(237,28,36,.55);color:var(--red-soft)}
+
 @media (max-height:700px){
   .big{font-size:clamp(28px,8vw,38px)}
   .sub{margin-bottom:20px}

@@ -120,7 +120,11 @@ export default function RegistrationFlow({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [voucherCode, setVoucherCode] = useState<string | null>(null);
   const [voucherPop, setVoucherPop] = useState(false);
+  const [kioskCountdown, setKioskCountdown] = useState<number | null>(null);
+  const [stillThere, setStillThere] = useState(false);
+  const [stillThereCount, setStillThereCount] = useState(10);
   const leaveTimer = useRef<number | null>(null);
+  const lastActivity = useRef(Date.now());
 
   const patch = (partial: Partial<Answers>) =>
     setAnswers((prev) => ({ ...prev, ...partial }));
@@ -210,6 +214,8 @@ export default function RegistrationFlow({
     go(7);
   };
 
+  // Full reset — clears EVERY answer and error (kiosk privacy rule: the
+  // next guest must never see the previous guest's entries).
   const restart = () => {
     setAnswers(INITIAL_ANSWERS);
     setNameError(null);
@@ -219,8 +225,84 @@ export default function RegistrationFlow({
     setSubmitting(false);
     setVoucherCode(null);
     setVoucherPop(false);
+    setKioskCountdown(null);
+    setStillThere(false);
+    lastActivity.current = Date.now();
     go(0);
   };
+
+  // ---- kiosk behaviors (docs/ARCHITECTURE.md "Kiosk mode") ----
+
+  // 20s auto-reset after the voucher screen; countdown surfaces from 10s.
+  useEffect(() => {
+    if (!kiosk || step !== 7) {
+      setKioskCountdown(null);
+      return;
+    }
+    setKioskCountdown(20);
+    const interval = window.setInterval(
+      () => setKioskCountdown((c) => (c === null || c <= 0 ? c : c - 1)),
+      1000,
+    );
+    return () => window.clearInterval(interval);
+  }, [kiosk, step]);
+
+  useEffect(() => {
+    if (kioskCountdown === 0) restart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kioskCountdown]);
+
+  // Any tap or key counts as activity for the idle timer.
+  useEffect(() => {
+    if (!kiosk) return;
+    const bump = () => {
+      lastActivity.current = Date.now();
+    };
+    window.addEventListener("pointerdown", bump);
+    window.addEventListener("keydown", bump);
+    return () => {
+      window.removeEventListener("pointerdown", bump);
+      window.removeEventListener("keydown", bump);
+    };
+  }, [kiosk]);
+
+  // 45s idle on any screen with data in play -> "Still there?" overlay.
+  useEffect(() => {
+    if (!kiosk || stillThere) return;
+    const interval = window.setInterval(() => {
+      const dirty =
+        answers.name !== "" ||
+        answers.email !== "" ||
+        answers.phone !== "" ||
+        answers.gadget !== null ||
+        answers.move !== null ||
+        answers.timing !== null ||
+        !answers.consent;
+      if (step === 7) return; // the 20s voucher reset owns that screen
+      if ((step > 0 || dirty) && Date.now() - lastActivity.current > 45_000) {
+        setStillThere(true);
+      }
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, [kiosk, stillThere, step, answers]);
+
+  // Overlay: reset to welcome after 10 more seconds, wiping everything.
+  useEffect(() => {
+    if (!stillThere) {
+      setStillThereCount(10);
+      return;
+    }
+    const interval = window.setInterval(
+      () => setStillThereCount((c) => (c <= 0 ? c : c - 1)),
+      1000,
+    );
+    return () => window.clearInterval(interval);
+  }, [stillThere]);
+
+  useEffect(() => {
+    if (stillThere && stillThereCount === 0) restart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stillThere, stillThereCount]);
 
   const screenClass = (n: number) =>
     `screen${step === n ? " on" : ""}${leaving === n ? " out" : ""}`;
@@ -311,6 +393,7 @@ export default function RegistrationFlow({
           code={voucherCode ?? ""}
           pop={voucherPop}
           kiosk={kiosk}
+          countdown={kioskCountdown}
           onRestart={restart}
         />
       ),
@@ -357,6 +440,28 @@ export default function RegistrationFlow({
       </div>
 
       {step === 7 && voucherPop ? <Confetti /> : null}
+
+      {stillThere ? (
+        <div className="stillthere" role="alertdialog" aria-label="Still there?">
+          <div className="stillthere-card">
+            <div className="eyebrow">Still there?</div>
+            <p className="sub">
+              Starting fresh for the next guest in <b>{stillThereCount}s</b>.
+            </p>
+            <button
+              type="button"
+              className="cta"
+              suppressHydrationWarning
+              onClick={() => {
+                lastActivity.current = Date.now();
+                setStillThere(false);
+              }}
+            >
+              I&rsquo;m still here
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

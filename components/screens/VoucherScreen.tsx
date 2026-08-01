@@ -5,12 +5,14 @@ export default function VoucherScreen({
   code,
   pop,
   kiosk,
+  countdown = null,
   onRestart,
 }: {
   firstName: string;
   code: string;
   pop: boolean;
   kiosk: boolean;
+  countdown?: number | null;
   onRestart: () => void;
 }) {
   const [copied, setCopied] = useState(false);
@@ -71,6 +73,9 @@ export default function VoucherScreen({
           Follow @Askmitch_multiventures
         </a>
       )}
+      {kiosk && countdown !== null && countdown <= 10 ? (
+        <p className="fine">Starting over in {countdown}…</p>
+      ) : null}
       <p className="fine">Tech, Style, Askmitch Anything…</p>
     </>
   );

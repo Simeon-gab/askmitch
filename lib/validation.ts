@@ -30,3 +30,10 @@ export const registrationSchema = z.object({
 
 export type RegistrationInput = z.input<typeof registrationSchema>;
 export type RegistrationData = z.output<typeof registrationSchema>;
+
+// POST /api/redeem — staff voucher check/mark (docs/ARCHITECTURE.md).
+export const redeemSchema = z.object({
+  code: z.string().trim().min(1).max(40),
+  pin: z.string().trim().min(1).max(32),
+  confirm: z.boolean().optional(),
+});

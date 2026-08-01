@@ -29,6 +29,16 @@ export function generateVoucherCode(): string {
   return VOUCHER_PREFIX + suffix;
 }
 
+// Flexible staff input -> canonical code (docs/ARCHITECTURE.md: 'mitch k3xt9'
+// must match 'MITCH-K3XT9'). Case-insensitive; whitespace/hyphens/punctuation
+// stripped; a bare 5-char suffix is accepted. Null when it can't be a code.
+export function normalizeVoucherInput(raw: string): string | null {
+  const cleaned = raw.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const suffix = cleaned.startsWith("MITCH") ? cleaned.slice(5) : cleaned;
+  if (suffix.length !== VOUCHER_SUFFIX_LENGTH) return null;
+  return VOUCHER_PREFIX + suffix;
+}
+
 // docs/DATABASE.md: on collision, regenerate — loop max 5, then fail.
 // The register route maps VoucherGenerationError to a 500.
 export async function generateUniqueVoucherCode(
