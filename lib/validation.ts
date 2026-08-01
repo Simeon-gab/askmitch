@@ -1,19 +1,12 @@
 // Shared Zod schema for POST /api/register (docs/ARCHITECTURE.md contract).
-// The client uses it for inline checks; the server ALWAYS re-runs it (hard rule).
+// Server-side import only — the client flow mirrors these rules with the
+// prototype's inline checks and imports lib/options.ts instead, keeping zod
+// out of the browser bundle (DESIGN.md perf budget). The server ALWAYS
+// re-validates with this schema regardless of client checks (hard rule).
 import { z } from "zod";
+import { GADGETS, MOVES, SOURCES, TIMINGS } from "@/lib/options";
 
-export const GADGETS = [
-  "iphone",
-  "samsung",
-  "laptop",
-  "audio",
-  "watch",
-  "gaming",
-  "other",
-] as const;
-export const MOVES = ["buy", "sell", "swap", "browsing"] as const;
-export const TIMINGS = ["today", "this_week", "this_month", "someday"] as const;
-export const SOURCES = ["qr", "kiosk", "link"] as const;
+export { GADGETS, MOVES, SOURCES, TIMINGS };
 
 // Error strings are verbatim validation microcopy from docs/DESIGN.md.
 export const registrationSchema = z.object({

@@ -1,0 +1,306 @@
+/* Ported from docs/prototype/askmitch-opening-registration.html — the
+   approved design. Class names, tokens, timings and easings are kept
+   verbatim so production stays visually indistinguishable (DESIGN.md).
+   Only additions: button-element resets (cards/rows are real <button>s for
+   keyboard access), honeypot, in-button spinner, inline error line, the
+   "Something else" wide card, and the CSS-3D voucher/press tilts — all
+   transform/opacity only. */
+
+:root{
+  --red:#ED1C24;
+  --red-dark:#B8121A;
+  --red-soft:#FF8A8E;
+  --black:#0C0C0C;
+  --ink:#161616;
+  --white:#FFFFFF;
+  --off:#F6F3F1;
+  --muted:rgba(255,255,255,.62);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{
+  font-family:var(--font-manrope),sans-serif;
+  background:var(--black);
+  color:var(--white);
+  overflow:hidden;
+  position:fixed;
+  inset:0;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(237,28,36,.22), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 110%, rgba(237,28,36,.14), transparent 60%);
+  pointer-events:none;
+}
+.app{
+  position:relative;
+  height:100dvh;
+  max-width:480px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  padding:0 24px;
+}
+
+/* ---------- header ---------- */
+.top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 0 10px;
+  z-index:5;
+}
+.mark{display:flex;align-items:center;gap:10px}
+.tri{
+  width:34px;height:34px;position:relative;flex:none;
+}
+.tri svg{width:100%;height:100%;display:block}
+.wordmark{line-height:1}
+.wordmark b{
+  font-family:var(--font-anton),sans-serif;font-weight:400;
+  font-size:17px;letter-spacing:.06em;color:var(--white);display:block;
+}
+.wordmark span{
+  font-size:8.5px;letter-spacing:.42em;font-weight:700;color:var(--red);display:block;margin-top:2px;
+}
+.stepcount{
+  font-family:var(--font-anton),sans-serif;font-size:13px;letter-spacing:.12em;
+  color:var(--muted);
+}
+.stepcount em{font-style:normal;color:var(--red)}
+
+/* progress ribbon */
+.ribbon{height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.ribbon i{display:block;height:100%;width:0%;background:var(--red);transition:width .6s cubic-bezier(.65,0,.35,1)}
+
+/* ---------- screens ---------- */
+.stage{position:relative;flex:1;min-height:0}
+.screen{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;justify-content:flex-start;
+  opacity:0;pointer-events:none;
+  transform:translateY(28px);
+  transition:opacity .5s ease,transform .5s cubic-bezier(.22,1,.36,1);
+  padding:36px 0 24px; /* top clears the Back button when tall screens top-align */
+  overflow-y:auto;
+  scrollbar-width:none;
+}
+.screen::-webkit-scrollbar{display:none}
+/* Auto margins center the content like the prototype when it fits, and
+   let tall screens (gadget grid, keyboard open at 360px) scroll instead
+   of clipping. */
+.screen-inner{margin:auto 0;width:100%}
+.screen.on{opacity:1;pointer-events:auto;transform:translateY(0)}
+.screen.out{opacity:0;transform:translateY(-24px)}
+
+.eyebrow{
+  font-family:var(--font-kaushan),cursive;
+  color:var(--red);font-size:clamp(20px,5.6vw,26px);
+  margin-bottom:10px;
+  transform:rotate(-2deg);transform-origin:left;
+}
+.big{
+  font-family:var(--font-anton),sans-serif;font-weight:400;
+  font-size:clamp(34px,9.5vw,46px);
+  line-height:1.04;letter-spacing:.01em;
+  text-transform:uppercase;
+  margin-bottom:14px;
+}
+.big .r{color:var(--red)}
+.sub{color:var(--muted);font-size:15px;line-height:1.65;font-weight:500;max-width:36ch;margin-bottom:28px}
+.sub b{color:var(--white);font-weight:700}
+
+/* staggered entrance */
+.screen .eyebrow,.screen .big,.screen .sub,.screen .field,.screen .grid,.screen .stack,.screen .cta,.screen .fine{
+  opacity:0;transform:translateY(16px);
+  transition:opacity .55s ease,transform .55s cubic-bezier(.22,1,.36,1);
+}
+.screen.on .eyebrow{opacity:1;transform:rotate(-2deg);transition-delay:.05s}
+.screen.on .big{opacity:1;transform:none;transition-delay:.12s}
+.screen.on .sub{opacity:1;transform:none;transition-delay:.2s}
+.screen.on .field,.screen.on .grid,.screen.on .stack{opacity:1;transform:none;transition-delay:.28s}
+.screen.on .cta{opacity:1;transform:none;transition-delay:.36s}
+.screen.on .fine{opacity:1;transform:none;transition-delay:.44s}
+
+/* ---------- inputs ---------- */
+.field input[type=text],.field input[type=email],.field input[type=tel]{
+  width:100%;
+  background:rgba(255,255,255,.05);
+  border:1.5px solid rgba(255,255,255,.16);
+  border-radius:14px;
+  padding:17px 18px;
+  color:var(--white);
+  font-family:var(--font-manrope),sans-serif;
+  font-size:17px;font-weight:600;
+  outline:none;
+  transition:border-color .2s,background .2s,box-shadow .2s;
+}
+.field input::placeholder{color:rgba(255,255,255,.32);font-weight:500}
+.field input:focus{border-color:var(--red);background:rgba(237,28,36,.06);box-shadow:0 0 0 4px rgba(237,28,36,.15)}
+.field{margin-bottom:16px}
+.hint{font-size:12.5px;color:rgba(255,255,255,.4);margin-top:9px;font-weight:500}
+.hint.err{color:#FF6B6B}
+
+/* consent */
+.consent{
+  display:flex;gap:11px;align-items:flex-start;
+  font-size:13px;color:var(--muted);line-height:1.55;font-weight:500;
+  margin-bottom:6px;cursor:pointer;user-select:none;
+}
+.consent input{width:19px;height:19px;flex:none;accent-color:var(--red);margin-top:1px;cursor:pointer}
+
+/* ---------- option cards ---------- */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:22px;perspective:900px}
+.card{
+  border:1.5px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.04);
+  border-radius:16px;
+  padding:18px 12px 15px;
+  display:flex;flex-direction:column;align-items:center;gap:9px;
+  cursor:pointer;user-select:none;
+  transition:transform .12s ease,border-color .18s,background .18s;
+  text-align:center;
+  appearance:none;-webkit-appearance:none;
+  font-family:inherit;color:var(--white);
+}
+.card svg{width:27px;height:27px;stroke:rgba(255,255,255,.75);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke .18s}
+.card span{font-size:13.5px;font-weight:700;letter-spacing:.01em}
+.card:active{transform:scale(.955) rotateX(7deg)}
+.card.sel{border-color:var(--red);background:rgba(237,28,36,.13)}
+.card.sel svg{stroke:var(--red)}
+.card.sel span{color:#FF9A9E}
+.card.wide{grid-column:1 / -1;flex-direction:row;justify-content:center;gap:10px;padding:14px 12px}
+
+.stack{display:flex;flex-direction:column;gap:10px;margin-bottom:22px;perspective:900px}
+.row{
+  border:1.5px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.04);
+  border-radius:14px;
+  padding:16px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;user-select:none;
+  font-size:15px;font-weight:700;
+  transition:transform .12s,border-color .18s,background .18s;
+  appearance:none;-webkit-appearance:none;
+  font-family:inherit;color:var(--white);text-align:left;width:100%;
+}
+.row small{font-weight:600;color:rgba(255,255,255,.4);font-size:12.5px;margin-left:10px}
+.row .dot{
+  width:20px;height:20px;border-radius:50%;flex:none;
+  border:2px solid rgba(255,255,255,.3);
+  transition:border-color .15s,background .15s,box-shadow .15s;
+}
+.row:active{transform:scale(.98) rotateX(4deg)}
+.row.sel{border-color:var(--red);background:rgba(237,28,36,.12)}
+.row.sel .dot{border-color:var(--red);background:var(--red);box-shadow:inset 0 0 0 4px var(--black)}
+
+/* ---------- buttons ---------- */
+.cta{
+  width:100%;
+  background:var(--red);
+  color:var(--white);
+  border:none;border-radius:14px;
+  font-family:var(--font-anton),sans-serif;font-weight:400;
+  font-size:17px;letter-spacing:.09em;text-transform:uppercase;
+  padding:18px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:transform .12s,background .18s,opacity .2s;
+}
+.cta:active{transform:scale(.975)}
+.cta:hover{background:var(--red-dark)}
+.cta[disabled]{opacity:.35;pointer-events:none}
+.cta.ghost{background:transparent;border:1.5px solid rgba(255,255,255,.25);font-size:14px;padding:14px;text-decoration:none}
+.cta svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.fine{font-size:12px;color:rgba(255,255,255,.38);margin-top:14px;text-align:center;font-weight:500}
+
+.back{
+  position:absolute;top:-2px;left:0;
+  background:none;border:none;color:rgba(255,255,255,.45);
+  font-family:var(--font-manrope),sans-serif;font-size:13px;font-weight:700;
+  display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 8px 8px 0;
+  z-index:6;
+}
+.back svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+
+/* in-button spinner (final CTA loading state) */
+.spinner{
+  width:18px;height:18px;flex:none;border-radius:50%;
+  border:2.5px solid rgba(255,255,255,.35);border-top-color:var(--white);
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* inline error line under the final CTA (429/500/network) */
+.formerr{
+  font-size:13px;color:var(--red-soft);font-weight:600;
+  margin-top:12px;text-align:center;line-height:1.5;
+}
+
+/* honeypot — visually gone, still in the form for bots */
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+
+/* ---------- welcome specifics ---------- */
+.badge{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid rgba(237,28,36,.5);
+  background:rgba(237,28,36,.1);
+  color:#FF8A8E;
+  border-radius:999px;
+  font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  padding:8px 15px;margin-bottom:20px;
+  width:fit-content;
+}
+.badge i{width:6px;height:6px;border-radius:50%;background:var(--red);display:block;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.meta{display:flex;gap:22px;margin-bottom:30px}
+.meta div{font-size:12.5px;color:var(--muted);font-weight:600;line-height:1.5}
+.meta b{display:block;color:var(--white);font-size:13.5px;font-weight:800}
+
+/* ---------- voucher ---------- */
+.voucher{
+  border:2px dashed rgba(237,28,36,.65);
+  background:rgba(237,28,36,.07);
+  border-radius:18px;
+  padding:24px 20px;
+  text-align:center;
+  margin-bottom:14px;
+  position:relative;
+  transform:perspective(900px) rotateX(24deg) scale(.85);opacity:0;
+  transition:transform .6s cubic-bezier(.34,1.56,.64,1),opacity .5s ease;
+}
+.voucher.pop{transform:perspective(900px) rotateX(0deg) scale(1);opacity:1}
+.voucher small{font-size:11px;letter-spacing:.3em;font-weight:800;color:#FF8A8E;text-transform:uppercase;display:block;margin-bottom:10px}
+.voucher .code{
+  font-family:var(--font-anton),sans-serif;font-size:clamp(28px,8vw,36px);
+  letter-spacing:.12em;color:var(--white);
+}
+.voucher .pct{
+  position:absolute;top:-16px;right:14px;
+  background:var(--red);color:var(--white);
+  font-family:var(--font-anton),sans-serif;font-size:14px;letter-spacing:.05em;
+  padding:7px 13px;border-radius:999px;
+  transform:rotate(4deg);
+}
+.copybtn{
+  background:none;border:none;color:#FF8A8E;font-family:var(--font-manrope),sans-serif;
+  font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:6px 10px;
+}
+.copybtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+
+/* keyboard focus (a11y) — invisible on touch */
+.card:focus-visible,.row:focus-visible,.cta:focus-visible,.back:focus-visible,.copybtn:focus-visible{
+  outline:2px solid var(--red);outline-offset:2px;
+}
+
+@media (max-height:700px){
+  .big{font-size:clamp(28px,8vw,38px)}
+  .sub{margin-bottom:20px}
+  .card{padding:14px 10px 12px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms!important;animation:none!important}
+}
