@@ -2,7 +2,8 @@
 
 **Event:** Saturday, 8th August 2026 · Sims Plaza, Olakunle Junction, Bembo, Alao Akala Expressway, Apata Road, Ibadan
 
-**Production URL:** `https://____________________` *(manager: fill in after deploy)*
+**Production URL:** `https://askmitch-askmitchltd-7739s-projects.vercel.app`
+*(bookmark it once on every staff phone — nobody should type it twice; if a branded domain like `www.askmitch.ng` is added later, the QR in `assets/` must be regenerated and reprinted)*
 
 ---
 
