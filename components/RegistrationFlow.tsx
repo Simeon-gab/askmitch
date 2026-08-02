@@ -361,15 +361,8 @@ const GADGET_CARDS: { value: Gadget; label: string; sub: string; icon: ReactNode
 const SIGN_OFF = "Tech, Style, Askmitch Anything…";
 const INSTAGRAM_URL = "https://instagram.com/Askmitch_multiventures";
 const STORE_ADDRESS = "Sims Plaza, Olakunle Junction, Bembo, Alao Akala Expressway, Apata Road, Ibadan";
-const CONTACTS = [
-  { name: "Mitch", number: "08101799537" },
-  { name: "Nasir", number: "08088547806" },
-] as const;
+const CONTACT_NUMBERS = ["07012806727", "008101799537"] as const;
 type QuickMenu = "whatsapp" | "call" | "venue" | null;
-
-function toWhatsAppNumber(number: string) {
-  return `234${number.slice(1)}`;
-}
 
 function copyText(value: string, onCopied: () => void) {
   void navigator.clipboard?.writeText(value);
@@ -388,9 +381,9 @@ function ContactMenu({
   const [copied, setCopied] = useState<string | null>(null);
   const label = mode === "whatsapp" ? "Message us on WhatsApp" : "Call us";
 
-  const handleCopy = (name: string, number: string) => {
+  const handleCopy = (number: string) => {
     copyText(number, () => {
-      setCopied(name);
+      setCopied(number);
       window.setTimeout(() => setCopied(null), 1600);
     });
   };
@@ -409,26 +402,25 @@ function ContactMenu({
       {open ? (
         <span className={s.contactPop} role="dialog" aria-label={label}>
           <span className={s.contactTitle}>{mode === "whatsapp" ? "Message on WhatsApp" : "Call ASKMITCH"}</span>
-          {CONTACTS.map((contact) => (
-            <span className={s.contactRow} key={contact.number}>
+          {CONTACT_NUMBERS.map((number) => (
+            <span className={s.contactRow} key={number}>
               <span>
-                <b>{contact.name}</b>
-                <small>{contact.number}</small>
+                <b>{number}</b>
               </span>
               <span className={s.contactActions}>
                 <button
                   type="button"
                   className={s.contactCopy}
-                  onClick={() => handleCopy(contact.name, contact.number)}
+                  onClick={() => handleCopy(number)}
                 >
-                  {copied === contact.name ? "Copied" : "Copy"}
+                  {copied === number ? "Copied" : "Copy"}
                 </button>
                 <a
                   className={s.contactOpen}
-                  href={mode === "whatsapp" ? `https://wa.me/${toWhatsAppNumber(contact.number)}` : `tel:${contact.number}`}
+                  href={mode === "whatsapp" ? `https://wa.me/${number}` : `tel:${number}`}
                   target={mode === "whatsapp" ? "_blank" : undefined}
                   rel={mode === "whatsapp" ? "noopener noreferrer" : undefined}
-                  aria-label={mode === "whatsapp" ? `Message ${contact.name} on WhatsApp` : `Call ${contact.name}`}
+                  aria-label={mode === "whatsapp" ? `Message ${number} on WhatsApp` : `Call ${number}`}
                 >
                   {mode === "whatsapp" ? <WhatsAppGlyph /> : <PhoneGlyph />}
                 </a>
