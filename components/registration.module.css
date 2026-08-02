@@ -749,6 +749,72 @@
     transform: translate(1px, -1px);
   }
 }
+.venueTile { z-index: 2; }
+.tileTrigger {
+  width: 100%;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.venuePop,
+.contactPop {
+  position: absolute;
+  z-index: 10;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-solid) 92%, transparent);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  animation: contactIn 0.18s var(--ease) both;
+}
+.venuePop {
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  border-radius: 14px;
+  padding: 13px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+.venueActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.venueActions button,
+.venueActions a,
+.contactCopy,
+.contactOpen {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+.venueActions svg,
+.contactOpen svg { width: 15px; height: 15px; }
+.venueActions svg { fill: none; stroke: currentColor; stroke-width: 2; }
+.contactOpen svg { fill: currentColor; stroke: none; }
+.venueActions button:active,
+.venueActions a:active,
+.contactCopy:active,
+.contactOpen:active { transform: scale(.96); }
+@keyframes contactIn { from { opacity: 0; transform: translateY(5px) scale(.98); } to { opacity: 1; transform: none; } }
 
 /* ---------- inputs ---------- */
 .field {
@@ -1182,6 +1248,7 @@
   gap: 12px;
   margin-top: 16px;
 }
+.contactControl { position: relative; display: inline-flex; }
 .socialBtn {
   width: 42px;
   height: 42px;
@@ -1189,8 +1256,55 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
+  border: 0;
+  padding: 0;
   background: var(--social-bg);
+  cursor: pointer;
   transition: transform 0.14s var(--ease), background 0.18s;
+}
+.contactPop {
+  width: min(260px, calc(100vw - 32px));
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 15px;
+  padding: 12px;
+  color: var(--text);
+  text-align: left;
+}
+.contactTitle {
+  display: block;
+  margin: 1px 2px 9px;
+  color: var(--accent-sm);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.contactRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 2px;
+  border-top: 1px solid var(--hairline);
+}
+.contactRow b,
+.contactRow small { display: block; }
+.contactRow b { font-size: 13px; line-height: 1.2; }
+.contactRow small { margin-top: 2px; color: var(--faint); font-size: 11px; font-weight: 650; }
+.contactActions { display: flex; gap: 6px; }
+.contactCopy { padding: 0 9px; }
+.contactOpen { width: 36px; flex: none; }
+/* Keep this origin anchored to the button that opened the menu. */
+.contactPop { animation: contactPopIn 0.18s var(--ease) both; }
+@keyframes contactPopIn {
+  from { opacity: 0; transform: translate(-50%, 5px) scale(.98); }
+  to { opacity: 1; transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .venuePop,
+  .contactPop { animation: none; }
 }
 .socialBtn svg {
   width: 19px;

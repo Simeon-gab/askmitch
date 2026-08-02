@@ -3,8 +3,8 @@
 // (read-only, org-scoped) are the enforcement layer. Manual refresh is fine
 // for v1 — no realtime.
 import Link from "next/link";
+import AdminHeader from "@/components/admin/AdminHeader";
 import SignOutButton from "@/components/admin/SignOutButton";
-import { LogoMark } from "@/components/screens/shared";
 import {
   GADGETS,
   GADGET_LABELS,
@@ -175,18 +175,15 @@ export default async function AdminPage({
 
   return (
     <div className="dash">
-      <div className="dash-head">
-        <LogoMark />
-        <div className="dash-actions">
-          <a className="dash-btn primary" href="/api/export">
-            Export CSV
-          </a>
-          <a className="dash-btn" href="/api/export?all=1" title="Includes non-consented leads">
-            Export all
-          </a>
-          <SignOutButton />
-        </div>
-      </div>
+      <AdminHeader>
+        <a className="dash-btn primary" href="/api/export">
+          Export CSV
+        </a>
+        <a className="dash-btn" href="/api/export?all=1" title="Includes non-consented leads">
+          Export all
+        </a>
+        <SignOutButton />
+      </AdminHeader>
 
       <div className="dash-grid">
         <div className="dash-card">

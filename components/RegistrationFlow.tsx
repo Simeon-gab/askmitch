@@ -359,9 +359,131 @@ const GADGET_CARDS: { value: Gadget; label: string; sub: string; icon: ReactNode
 
 const SIGN_OFF = "Tech, Style, Askmitch Anything…";
 const INSTAGRAM_URL = "https://instagram.com/Askmitch_multiventures";
-// TODO: real store number — none exists in docs yet (placeholder).
-const STORE_PHONE = "+2348000000000";
-const WHATSAPP_URL = `https://wa.me/${STORE_PHONE.replace("+", "")}`;
+const STORE_ADDRESS = "Sims Plaza, Olakunle Junction, Bembo, Alao Akala Expressway, Apata Road, Ibadan";
+const CONTACTS = [
+  { name: "Mitch", number: "08101799537" },
+  { name: "Nasir", number: "08088547806" },
+] as const;
+
+function toWhatsAppNumber(number: string) {
+  return `234${number.slice(1)}`;
+}
+
+function copyText(value: string, onCopied: () => void) {
+  void navigator.clipboard?.writeText(value);
+  onCopied();
+}
+
+function ContactMenu({ mode }: { mode: "whatsapp" | "call" }) {
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
+  const label = mode === "whatsapp" ? "Message us on WhatsApp" : "Call us";
+
+  const handleCopy = (name: string, number: string) => {
+    copyText(number, () => {
+      setCopied(name);
+      window.setTimeout(() => setCopied(null), 1600);
+    });
+  };
+
+  return (
+    <span className={s.contactControl}>
+      <button
+        type="button"
+        className={s.socialBtn}
+        onClick={() => setOpen((current) => !current)}
+        aria-label={label}
+        aria-expanded={open}
+      >
+        {mode === "whatsapp" ? <WhatsAppGlyph /> : <PhoneGlyph />}
+      </button>
+      {open ? (
+        <span className={s.contactPop} role="dialog" aria-label={label}>
+          <span className={s.contactTitle}>{mode === "whatsapp" ? "Message on WhatsApp" : "Call ASKMITCH"}</span>
+          {CONTACTS.map((contact) => (
+            <span className={s.contactRow} key={contact.number}>
+              <span>
+                <b>{contact.name}</b>
+                <small>{contact.number}</small>
+              </span>
+              <span className={s.contactActions}>
+                <button
+                  type="button"
+                  className={s.contactCopy}
+                  onClick={() => handleCopy(contact.name, contact.number)}
+                >
+                  {copied === contact.name ? "Copied" : "Copy"}
+                </button>
+                <a
+                  className={s.contactOpen}
+                  href={mode === "whatsapp" ? `https://wa.me/${toWhatsAppNumber(contact.number)}` : `tel:${contact.number}`}
+                  target={mode === "whatsapp" ? "_blank" : undefined}
+                  rel={mode === "whatsapp" ? "noopener noreferrer" : undefined}
+                  aria-label={mode === "whatsapp" ? `Message ${contact.name} on WhatsApp` : `Call ${contact.name}`}
+                >
+                  {mode === "whatsapp" ? <WhatsAppGlyph /> : <PhoneGlyph />}
+                </a>
+              </span>
+            </span>
+          ))}
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
+function VenueMenu({ mapsHref }: { mapsHref: string }) {
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  return (
+    <div className={`${s.tile} ${s.tileLink} ${s.venueTile}`}>
+      <button
+        type="button"
+        className={s.tileTrigger}
+        onClick={() => setOpen((current) => !current)}
+        aria-expanded={open}
+        aria-label="Show venue actions for Sims Plaza, Apata Road"
+      >
+        <span className={s.tileGo}>
+          <ExternalIcon />
+        </span>
+        <span className={s.tileIcon}>
+          <PinIcon />
+        </span>
+        <span className={s.tileKicker}>Venue</span>
+        <b className={s.tileValue}>Sims Plaza, Apata Rd</b>
+      </button>
+      {open ? (
+        <span className={s.venuePop} role="dialog" aria-label="Venue actions">
+          <span>{STORE_ADDRESS}</span>
+          <span className={s.venueActions}>
+            <button
+              type="button"
+              onClick={() => {
+                copyText(STORE_ADDRESS, () => {
+                  setCopied(true);
+                  window.setTimeout(() => setCopied(false), 1600);
+                });
+              }}
+            >
+              <CopyIcon />
+              {copied ? "Copied" : "Copy address"}
+            </button>
+            <a
+              href={mapsHref}
+              target={mapsHref.startsWith("http") ? "_blank" : undefined}
+              rel="noreferrer"
+            >
+              <ExternalIcon />
+              Open maps
+            </a>
+          </span>
+        </span>
+      ) : null}
+    </div>
+  );
+}
 
 /* Sign-off + socials. The line types itself in on the welcome screen. */
 function FooterLine({ typed = false }: { typed?: boolean }) {
@@ -383,18 +505,8 @@ function FooterLine({ typed = false }: { typed?: boolean }) {
         >
           <InstagramGlyph />
         </a>
-        <a
-          className={s.socialBtn}
-          href={WHATSAPP_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Message ASKMITCH on WhatsApp"
-        >
-          <WhatsAppGlyph />
-        </a>
-        <a className={s.socialBtn} href={`tel:${STORE_PHONE}`} aria-label="Call ASKMITCH">
-          <PhoneGlyph />
-        </a>
+        <ContactMenu mode="whatsapp" />
+        <ContactMenu mode="call" />
       </span>
     </>
   );
@@ -847,22 +959,7 @@ export default function RegistrationFlow({
                 <span className={s.tileKicker}>Date</span>
                 <b className={s.tileValue}>Sat, 8th August</b>
               </div>
-              <a
-                className={`${s.tile} ${s.tileLink}`}
-                href={mapsHref}
-                target={mapsHref.startsWith("http") ? "_blank" : undefined}
-                rel="noreferrer"
-                aria-label="Open Sims Plaza, Apata Rd in your maps app"
-              >
-                <span className={s.tileGo}>
-                  <ExternalIcon />
-                </span>
-                <span className={s.tileIcon}>
-                  <PinIcon />
-                </span>
-                <span className={s.tileKicker}>Venue</span>
-                <b className={s.tileValue}>Sims Plaza, Apata Rd</b>
-              </a>
+              <VenueMenu mapsHref={mapsHref} />
             </div>
 
             <button type="button" className={s.cta} suppressHydrationWarning onClick={() => go(1)}>

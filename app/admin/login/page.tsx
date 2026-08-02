@@ -4,7 +4,8 @@
 // account). Middleware redirects unauthenticated /admin visits here.
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogoMark } from "@/components/screens/shared";
+import AdminHeader from "@/components/admin/AdminHeader";
+import LoginShaderBackdrop from "@/components/admin/LoginShaderBackdrop";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function AdminLoginPage() {
@@ -33,56 +34,55 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="app rd">
-      <div className="top">
-        <LogoMark />
-        <div className="stepcount">OWNER</div>
-      </div>
-      <div className="ribbon">
-        <i style={{ width: "0%" }} />
-      </div>
-      <div className="rd-stage">
-        <div>
-          <div className="eyebrow">Numbers time…</div>
-          <h1 className="big">
-            Owner <span className="r">login</span>
-          </h1>
-          <div className="field">
-            <input
+    <>
+      <LoginShaderBackdrop />
+      <div className="app rd">
+        <AdminHeader>
+          <span className="admin-role">OWNER</span>
+        </AdminHeader>
+        <div className="rd-stage">
+          <div>
+            <div className="eyebrow">Numbers time…</div>
+            <h1 className="big">
+              Owner <span className="r">login</span>
+            </h1>
+            <div className="field">
+              <input
+                suppressHydrationWarning
+                type="email"
+                placeholder="Email"
+                autoComplete="username"
+                inputMode="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <input
+                suppressHydrationWarning
+                type="password"
+                placeholder="Password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void signIn();
+                }}
+              />
+              {error ? <div className="hint err">{error}</div> : null}
+            </div>
+            <button
+              type="button"
+              className="cta"
+              onClick={() => void signIn()}
+              disabled={busy || email.trim() === "" || password === ""}
               suppressHydrationWarning
-              type="email"
-              placeholder="Email"
-              autoComplete="username"
-              inputMode="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            >
+              {busy ? "Signing in…" : "Sign in"}
+            </button>
           </div>
-          <div className="field">
-            <input
-              suppressHydrationWarning
-              type="password"
-              placeholder="Password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") void signIn();
-              }}
-            />
-            {error ? <div className="hint err">{error}</div> : null}
-          </div>
-          <button
-            type="button"
-            className="cta"
-            onClick={() => void signIn()}
-            disabled={busy || email.trim() === "" || password === ""}
-            suppressHydrationWarning
-          >
-            {busy ? "Signing in…" : "Sign in"}
-          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 }
