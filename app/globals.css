@@ -123,7 +123,7 @@ body::before{
 .screen.on .fine{opacity:1;transform:none;transition-delay:.44s}
 
 /* ---------- inputs ---------- */
-.field input[type=text],.field input[type=email],.field input[type=tel]{
+.field input[type=text],.field input[type=email],.field input[type=tel],.field input[type=password]{
   width:100%;
   background:rgba(255,255,255,.05);
   border:1.5px solid rgba(255,255,255,.16);
@@ -165,6 +165,8 @@ body::before{
 }
 .card svg{width:27px;height:27px;stroke:rgba(255,255,255,.75);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke .18s}
 .card span{font-size:13.5px;font-weight:700;letter-spacing:.01em}
+.card small{font-weight:600;color:rgba(255,255,255,.4);font-size:11px;line-height:1.3;margin-top:-4px}
+.card.sel small{color:rgba(255,154,158,.75)}
 .card:active{transform:scale(.955) rotateX(7deg)}
 .card.sel{border-color:var(--red);background:rgba(237,28,36,.13)}
 .card.sel svg{stroke:var(--red)}
@@ -306,6 +308,7 @@ canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 [data-kiosk] .row{padding:19px 20px;font-size:17px;min-height:52px}
 [data-kiosk] .card{padding:21px 14px 18px}
 [data-kiosk] .card span{font-size:15px}
+[data-kiosk] .card small{font-size:12.5px}
 [data-kiosk] .field input{padding:19px 20px;font-size:19px}
 [data-kiosk] .back{font-size:15px;padding:12px 12px 12px 0}
 [data-kiosk] .hint{font-size:14px}

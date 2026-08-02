@@ -4,10 +4,11 @@ import { BackButton, Cta } from "./shared";
 
 // Icon SVGs verbatim from the prototype; "Something else" added per
 // DESIGN.md (7th card revealing a small free-text input, maps to 'other').
-const CARDS: { value: Gadget; label: string; icon: ReactNode }[] = [
+const CARDS: { value: Gadget; label: string; sub: string; icon: ReactNode }[] = [
   {
     value: "iphone",
     label: "iPhone",
+    sub: "XR to 17 Pro Max",
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <rect x="7" y="2.5" width="10" height="19" rx="2.5" />
@@ -18,6 +19,7 @@ const CARDS: { value: Gadget; label: string; icon: ReactNode }[] = [
   {
     value: "samsung",
     label: "Samsung",
+    sub: "Galaxy A to S Ultra",
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <rect x="7" y="2.5" width="10" height="19" rx="2.5" />
@@ -28,6 +30,7 @@ const CARDS: { value: Gadget; label: string; icon: ReactNode }[] = [
   {
     value: "laptop",
     label: "Laptop",
+    sub: "MacBook & Windows",
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <rect x="4" y="5" width="16" height="11" rx="1.5" />
@@ -38,6 +41,7 @@ const CARDS: { value: Gadget; label: string; icon: ReactNode }[] = [
   {
     value: "audio",
     label: "Audio & speakers",
+    sub: "Buds, pods & speakers",
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M4 13a8 8 0 0 1 16 0" />
@@ -49,6 +53,7 @@ const CARDS: { value: Gadget; label: string; icon: ReactNode }[] = [
   {
     value: "watch",
     label: "Smartwatch",
+    sub: "Apple Watch & more",
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <rect x="7" y="6.5" width="10" height="11" rx="3" />
@@ -59,6 +64,7 @@ const CARDS: { value: Gadget; label: string; icon: ReactNode }[] = [
   {
     value: "gaming",
     label: "Gaming",
+    sub: "Consoles, pads & VR",
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M6 9h12a4 4 0 0 1 4 4v2a3 3 0 0 1-5.5 1.7L15 15H9l-1.5 1.7A3 3 0 0 1 2 15v-2a4 4 0 0 1 4-4Z" />
@@ -107,6 +113,7 @@ export default function GadgetScreen({
           >
             {card.icon}
             <span>{card.label}</span>
+            <small>{card.sub}</small>
           </button>
         ))}
         <button
