@@ -64,6 +64,8 @@
   --social-bg: rgba(226, 58, 64, 0.2);
   --social-bg-hover: rgba(226, 58, 64, 0.34);
   --select-bg: rgba(226, 58, 64, 0.32);
+  --overlay: rgba(15, 13, 13, 0.88);
+  --surface-solid: #1c1919;
   --voucher-border: rgba(226, 58, 64, 0.65);
   --voucher-bg: rgba(226, 58, 64, 0.07);
 }
@@ -103,6 +105,8 @@
   --social-bg: rgba(226, 58, 64, 0.88);
   --social-bg-hover: rgba(226, 58, 64, 1);
   --select-bg: rgba(226, 58, 64, 0.22);
+  --overlay: rgba(246, 243, 241, 0.92);
+  --surface-solid: #ffffff;
   --voucher-border: rgba(190, 42, 48, 0.5);
   --voucher-bg: rgba(226, 58, 64, 0.05);
 }
@@ -1201,6 +1205,122 @@
   .socialBtn:hover {
     background: var(--social-bg-hover);
   }
+}
+
+/* in-button spinner (final CTA loading state) */
+.spinner {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* inline error under the final CTA (429/500/network) */
+.formerr {
+  font-size: 13px;
+  color: var(--err);
+  font-weight: 600;
+  margin-top: 12px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* honeypot — visually gone, still in the form for bots */
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- "Still there?" inactivity overlay (kiosk) ---------- */
+.stillthere {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: var(--overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.stillthereCard {
+  width: 100%;
+  max-width: 420px;
+  border: 1.5px solid var(--ticket-border);
+  background: var(--surface-solid);
+  border-radius: 20px;
+  padding: 28px 24px;
+  text-align: left;
+}
+.stillthereCard .sub {
+  margin-bottom: 20px;
+}
+
+/* ---------- kiosk mode: ~15% larger type, 52px targets ---------- */
+.page[data-kiosk] .frame {
+  max-width: 560px;
+}
+.page[data-kiosk] .big {
+  font-size: clamp(48px, 13vw, 60px);
+}
+.page[data-kiosk] .eyebrow {
+  font-size: clamp(25px, 6.6vw, 32px);
+}
+.page[data-kiosk] .sub {
+  font-size: 18px;
+  max-width: 38ch;
+}
+.page[data-kiosk] .cta {
+  padding: 23px 28px;
+  font-size: 20px;
+}
+.page[data-kiosk] .ghost {
+  padding: 16px;
+  font-size: 16px;
+}
+.page[data-kiosk] .row {
+  padding: 15px 18px 15px 14px;
+  font-size: 17px;
+  min-height: 52px;
+}
+.page[data-kiosk] .card {
+  padding: 17px;
+}
+.page[data-kiosk] .cardLabel {
+  font-size: 16px;
+}
+.page[data-kiosk] .cardSub {
+  font-size: 13px;
+}
+.page[data-kiosk] .field input {
+  padding: 19px 20px;
+  font-size: 19px;
+}
+.page[data-kiosk] .back {
+  font-size: 15px;
+  padding: 12px 12px 12px 0;
+}
+.page[data-kiosk] .hint {
+  font-size: 14px;
+}
+.page[data-kiosk] .consent {
+  font-size: 15px;
+}
+.page[data-kiosk] .consent input {
+  width: 24px;
+  height: 24px;
 }
 
 /* a11y focus — invisible on touch */
