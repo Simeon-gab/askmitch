@@ -1,5 +1,6 @@
 // Shared primitives for the flow screens. Markup and SVG paths are lifted
 // verbatim from the approved prototype.
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 export function ArrowRightIcon() {
@@ -56,7 +57,7 @@ export function Cta({
 
 export function LogoMark() {
   return (
-    <a className="mark" href="/" aria-label="ASKMITCH home">
+    <Link className="mark" href="/" aria-label="ASKMITCH home">
       <div className="tri">
         <svg viewBox="0 0 100 100" aria-hidden="true">
           <circle
@@ -77,6 +78,6 @@ export function LogoMark() {
         <b>ASKMITCH</b>
         <span>MULTI-VENTURES</span>
       </div>
-    </a>
+    </Link>
   );
 }

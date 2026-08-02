@@ -17,6 +17,7 @@ import {
   type RefObject,
 } from "react";
 import { flushSync } from "react-dom";
+import Link from "next/link";
 import Confetti from "@/components/Confetti";
 import type { Source } from "@/lib/options";
 import s from "./registration.module.css";
@@ -364,6 +365,7 @@ const CONTACTS = [
   { name: "Mitch", number: "08101799537" },
   { name: "Nasir", number: "08088547806" },
 ] as const;
+type QuickMenu = "whatsapp" | "call" | "venue" | null;
 
 function toWhatsAppNumber(number: string) {
   return `234${number.slice(1)}`;
@@ -381,7 +383,7 @@ function ContactMenu({
 }: {
   mode: "whatsapp" | "call";
   open: boolean;
-  onOpenChange: (mode: "whatsapp" | "call" | null) => void;
+  onOpenChange: (menu: QuickMenu) => void;
 }) {
   const [copied, setCopied] = useState<string | null>(null);
   const label = mode === "whatsapp" ? "Message us on WhatsApp" : "Call us";
@@ -439,8 +441,15 @@ function ContactMenu({
   );
 }
 
-function VenueMenu({ mapsHref }: { mapsHref: string }) {
-  const [open, setOpen] = useState(false);
+function VenueMenu({
+  mapsHref,
+  open,
+  onOpenChange,
+}: {
+  mapsHref: string;
+  open: boolean;
+  onOpenChange: (menu: QuickMenu) => void;
+}) {
   const [copied, setCopied] = useState(false);
 
   return (
@@ -448,7 +457,7 @@ function VenueMenu({ mapsHref }: { mapsHref: string }) {
       <button
         type="button"
         className={s.tileTrigger}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => onOpenChange(open ? null : "venue")}
         aria-expanded={open}
         aria-label="Show venue actions for Sims Plaza, Apata Road"
       >
@@ -493,9 +502,15 @@ function VenueMenu({ mapsHref }: { mapsHref: string }) {
 }
 
 /* Sign-off + socials. The line types itself in on the welcome screen. */
-function FooterLine({ typed = false }: { typed?: boolean }) {
-  const [activeContactMenu, setActiveContactMenu] = useState<"whatsapp" | "call" | null>(null);
-
+function FooterLine({
+  typed = false,
+  activeMenu,
+  onMenuChange,
+}: {
+  typed?: boolean;
+  activeMenu: QuickMenu;
+  onMenuChange: (menu: QuickMenu) => void;
+}) {
   return (
     <>
       <span className={s.signOffWrap}>
@@ -516,13 +531,13 @@ function FooterLine({ typed = false }: { typed?: boolean }) {
         </a>
         <ContactMenu
           mode="whatsapp"
-          open={activeContactMenu === "whatsapp"}
-          onOpenChange={setActiveContactMenu}
+          open={activeMenu === "whatsapp"}
+          onOpenChange={onMenuChange}
         />
         <ContactMenu
           mode="call"
-          open={activeContactMenu === "call"}
-          onOpenChange={setActiveContactMenu}
+          open={activeMenu === "call"}
+          onOpenChange={onMenuChange}
         />
       </span>
     </>
@@ -551,6 +566,7 @@ export default function RegistrationFlow({
   kiosk?: boolean;
 }) {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [activeQuickMenu, setActiveQuickMenu] = useState<QuickMenu>(null);
   const [step, setStep] = useState(0);
   const [leaving, setLeaving] = useState<number | null>(null);
   const [dir, setDir] = useState<"fwd" | "back">("fwd");
@@ -794,7 +810,7 @@ export default function RegistrationFlow({
 
       <div className={s.frame}>
         <header className={s.top}>
-          <a className={s.mark} href="/" aria-label="ASKMITCH home">
+          <Link className={s.mark} href="/" aria-label="ASKMITCH home">
             <div className={s.tri}>
               <TriMark />
             </div>
@@ -802,7 +818,7 @@ export default function RegistrationFlow({
               <b>ASKMITCH</b>
               <span>MULTI-VENTURES</span>
             </div>
-          </a>
+          </Link>
 
           <div className={s.topRight}>
             {step > 0 && step < 7 ? (
@@ -976,7 +992,11 @@ export default function RegistrationFlow({
                 <span className={s.tileKicker}>Date</span>
                 <b className={s.tileValue}>Sat, 8th August</b>
               </div>
-              <VenueMenu mapsHref={mapsHref} />
+              <VenueMenu
+                mapsHref={mapsHref}
+                open={activeQuickMenu === "venue"}
+                onOpenChange={setActiveQuickMenu}
+              />
             </div>
 
             <button type="button" className={s.cta} suppressHydrationWarning onClick={() => go(1)}>
@@ -987,7 +1007,7 @@ export default function RegistrationFlow({
             </button>
 
             <div className={s.fine}>
-              <FooterLine typed />
+              <FooterLine typed activeMenu={activeQuickMenu} onMenuChange={setActiveQuickMenu} />
             </div>
           </section>
 
@@ -1429,7 +1449,7 @@ export default function RegistrationFlow({
               </p>
             ) : null}
             <div className={`${s.fine} ${s.st} ${s.st6}`}>
-              <FooterLine />
+              <FooterLine activeMenu={activeQuickMenu} onMenuChange={setActiveQuickMenu} />
             </div>
           </section>
         </main>

@@ -673,6 +673,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  align-items: stretch;
 }
 .tile {
   position: relative;
@@ -682,7 +683,8 @@
   border: 1px solid var(--border);
   background: var(--surface);
   box-shadow: var(--tile-shadow);
-  border-radius: 16px;
+  min-height: 144px;
+  border-radius: 18px;
   padding: 16px;
   transition: border-color 0.18s, transform 0.14s var(--ease);
 }
@@ -713,6 +715,8 @@
   color: var(--accent-sm);
 }
 .tileValue {
+  display: block;
+  min-height: 2.6em;
   margin-top: 3px;
   font-size: 15px;
   font-weight: 800;
