@@ -1,0 +1,1217 @@
+/* /test visual lab — the full flow restyled. Brand DNA from
+   docs/DESIGN.md, production column width (480px). Motion is
+   transform/opacity only, brand easing cubic-bezier(.22,1,.36,1).
+   Screen transitions mirror production (500ms) and are direction-aware
+   via .stage[data-dir]. Welcome intro states live inside keyframe
+   `from` blocks and screen stagger is .on-driven, so the global
+   prefers-reduced-motion kill-switch leaves everything visible and
+   static. Theme swap is instant — no color animation. */
+
+.page {
+  /* brand constants */
+  /* Softened brand palette — LAB ONLY. docs/DESIGN.md ships #ED1C24 on
+     #0C0C0C; that pairing vibrates on screen (saturated red against
+     near-black). These pull ~8% saturation out of the red and lift the
+     canvas off pure black. Same hue family, far calmer. */
+  --red: #e23a40;
+  --red-dark: #c42a30;
+  --red-soft: #ff9da1;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  height: 100dvh;
+  overflow: hidden;              /* the active screen owns scrolling */
+  -webkit-font-smoothing: antialiased;
+  font-family: var(--font-manrope), sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  position: relative;
+}
+
+.page[data-theme="dark"] {
+  --bg: #141212;                     /* lifted off pure black, faintly warm */
+  --text: #f4f1f1;                   /* off-white — pure #fff glares here */
+  --muted: rgba(255, 255, 255, 0.62);
+  --faint: rgba(255, 255, 255, 0.42);
+  --surface: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.14);
+  --hairline: rgba(255, 255, 255, 0.1);
+  --accent-sm: var(--red-soft);      /* small red type stays legible */
+  --script-stroke: rgba(255, 138, 142, 0.8);
+  --icon-bg: rgba(226, 58, 64, 0.12);
+  --ticket-border: rgba(226, 58, 64, 0.45);
+  --ticket-bg: rgba(226, 58, 64, 0.08);
+  --tl-ring: #262323;
+  --tile-shadow: none;
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.16);
+  --input-focus-bg: rgba(226, 58, 64, 0.06);
+  --placeholder: rgba(255, 255, 255, 0.32);
+  --err: #ff6b6b;
+  --card-icon: rgba(255, 255, 255, 0.75);
+  /* selected fill stays a whisper so the label keeps full contrast —
+     the beam carries the emphasis, not the wash */
+  --sel-bg: rgba(226, 58, 64, 0.055);
+  --sel-text: #f4f1f1;
+  --sel-small: rgba(244, 241, 241, 0.6);
+  --dot-border: rgba(255, 255, 255, 0.3);
+  --sel-border: rgba(226, 58, 64, 0.42);
+  --sel-glow: 0 0 22px -6px rgba(226, 58, 64, 0.55);
+  /* comet ramps toward a white-hot tip on the dark canvas */
+  --beam-2: rgba(226, 58, 64, 0.85);
+  --beam-3: var(--red-soft);
+  --beam-tip: rgba(255, 255, 255, 0.92);
+  /* accent chip at low opacity — white glyphs read fine over the dark bg */
+  --social-bg: rgba(226, 58, 64, 0.2);
+  --social-bg-hover: rgba(226, 58, 64, 0.34);
+  --select-bg: rgba(226, 58, 64, 0.32);
+  --voucher-border: rgba(226, 58, 64, 0.65);
+  --voucher-bg: rgba(226, 58, 64, 0.07);
+}
+
+.page[data-theme="light"] {
+  --bg: #f6f3f1;                     /* brand --off */
+  --text: #171514;                   /* soft ink, not pure black */
+  --muted: rgba(12, 12, 12, 0.6);
+  --faint: rgba(12, 12, 12, 0.44);
+  --surface: #ffffff;
+  --border: rgba(12, 12, 12, 0.12);
+  --hairline: rgba(12, 12, 12, 0.09);
+  --accent-sm: var(--red-dark);      /* darker red for small text contrast */
+  --script-stroke: rgba(190, 42, 48, 0.55);
+  --icon-bg: rgba(226, 58, 64, 0.08);
+  --ticket-border: rgba(190, 42, 48, 0.3);
+  --ticket-bg: rgba(226, 58, 64, 0.05);
+  --tl-ring: #e5ddd8;
+  --tile-shadow: 0 1px 3px rgba(12, 12, 12, 0.05);
+  --input-bg: #ffffff;
+  --input-border: rgba(12, 12, 12, 0.16);
+  --input-focus-bg: #ffffff;
+  --placeholder: rgba(12, 12, 12, 0.34);
+  --err: #c81e25;
+  --card-icon: rgba(12, 12, 12, 0.65);
+  --sel-bg: rgba(226, 58, 64, 0.035);
+  --sel-text: #171514;
+  --sel-small: rgba(23, 21, 20, 0.58);
+  --dot-border: rgba(12, 12, 12, 0.28);
+  --sel-border: rgba(190, 42, 48, 0.38);
+  --sel-glow: 0 4px 18px -8px rgba(190, 42, 48, 0.45);
+  /* inverted on light: the tip darkens instead of blowing out to white */
+  --beam-2: rgba(226, 58, 64, 0.75);
+  --beam-3: var(--red);
+  --beam-tip: #9c2229;
+  /* light needs a stronger accent — white glyphs vanish on a pale tint */
+  --social-bg: rgba(226, 58, 64, 0.88);
+  --social-bg-hover: rgba(226, 58, 64, 1);
+  --select-bg: rgba(226, 58, 64, 0.22);
+  --voucher-border: rgba(190, 42, 48, 0.5);
+  --voucher-bg: rgba(226, 58, 64, 0.05);
+}
+
+/* Highlight: a translucent accent tint that keeps each element's own
+   colour, instead of a solid red slab. A solid red background painted
+   red-filled text (the script, the headline's red word) into an
+   unreadable block — the tint leaves every colour legible. */
+.page ::selection {
+  background: var(--select-bg);
+  color: inherit;
+  text-shadow: none;
+}
+
+/* the only gradient in the system — red glow, softer in light mode */
+.glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(226, 58, 64, 0.2), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 110%, rgba(226, 58, 64, 0.12), transparent 60%);
+}
+.page[data-theme="light"] .glow {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(226, 58, 64, 0.09), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 110%, rgba(226, 58, 64, 0.05), transparent 60%);
+}
+
+.frame {
+  position: relative;
+  height: 100%;
+  max-width: 480px; /* matches production .app column */
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- header ---------- */
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 0 16px;
+}
+.mark {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.tri {
+  width: 48px;
+  height: 48px;
+  flex: none;
+}
+.tri svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.wordmark {
+  line-height: 1;
+}
+.wordmark b {
+  font-family: var(--font-anton), sans-serif;
+  font-weight: 400;
+  font-size: 24px;
+  letter-spacing: 0.07em;
+  display: block;
+}
+.wordmark span {
+  font-size: 11.5px;
+  letter-spacing: 0.4em;
+  font-weight: 800;
+  color: var(--accent-sm);
+  display: block;
+  margin-top: 5px;
+}
+
+.topRight {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.stepcount {
+  font-family: var(--font-anton), sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: var(--faint);
+}
+.stepcount em {
+  font-style: normal;
+  color: var(--red);
+}
+
+.themeBtn {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: transform 0.16s var(--ease), border-color 0.18s, color 0.18s;
+}
+.themeBtn:active {
+  transform: scale(0.94);
+}
+.themeBtn svg {
+  width: 19px;
+  height: 19px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.iconSun,
+.iconMoon {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.iconSun {
+  opacity: 1;
+  transform: none;
+}
+.iconMoon {
+  opacity: 0;
+  transform: rotate(-45deg) scale(0.55);
+}
+.page[data-theme="light"] .iconSun {
+  opacity: 0;
+  transform: rotate(45deg) scale(0.55);
+}
+.page[data-theme="light"] .iconMoon {
+  opacity: 1;
+  transform: none;
+}
+
+/* progress ribbon — the track doubles as the header hairline */
+.ribbon {
+  height: 3px;
+  background: var(--hairline);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.ribbon i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--red);
+  transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ---------- screens (production .screen/.on/.out, direction-aware) ----------
+   Waiting screens have NO transition, so they can be repositioned
+   instantly (flushSync sets data-dir before the step changes). Only
+   .on / .out animate. Forward: enter from below, exit up. Back: enter
+   from above, exit down. */
+.stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;   /* lets the screens scroll instead of stretching .frame */
+}
+.scr {
+  position: absolute;
+  inset: 0;
+  padding: 28px 0 32px;
+  opacity: 0;
+  transform: translateY(28px);
+  transition: none;
+  pointer-events: none;
+  /* Screens fill the stage and centre their content vertically when it
+     fits; the auto-margin pseudos collapse when it doesn't, so tall
+     screens scroll from the top instead of clipping (the classic
+     flex `justify-content:center` overflow trap). */
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+}
+.scr::-webkit-scrollbar {
+  display: none;
+}
+.scr::before,
+.scr::after {
+  content: "";
+  flex: none;
+  margin: auto;
+}
+.stage[data-dir="back"] .scr:not(.on):not(.out) {
+  transform: translateY(-28px);
+}
+.scr.on {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  transition: opacity 0.5s ease, transform 0.5s var(--ease);
+}
+.scr.out {
+  opacity: 0;
+  transform: translateY(-24px);
+  transition: opacity 0.5s ease, transform 0.5s var(--ease);
+}
+.stage[data-dir="back"] .scr.out {
+  transform: translateY(24px);
+}
+
+/* welcome intro choreography — script leads, everything else follows.
+   Scoped to the first screen so shared classes (.sub, .cta) on other
+   screens use the .st stagger instead. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+.scr:first-child .ticket,
+.scr:first-child .sub,
+.scr:first-child .moves,
+.scr:first-child .tile,
+.scr:first-child .cta,
+.scr:first-child .fine {
+  animation: rise 0.65s var(--ease) both;
+}
+.scr:first-child .ticket { animation-delay: 0.35s; }
+.scr:first-child .sub { animation-delay: 0.78s; }
+.scr:first-child .moves { animation-delay: 0.9s; }
+.scr:first-child .tile:nth-child(1) { animation-delay: 1s; }
+.scr:first-child .tile:nth-child(2) { animation-delay: 1.08s; }
+.scr:first-child .cta { animation-delay: 1.18s; }
+.scr:first-child .fine { animation-delay: 1.28s; }
+
+/* stagger for non-welcome screens (prod pattern: .on drives transitions) */
+.st {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.55s ease, transform 0.55s var(--ease);
+}
+.scr.on .st {
+  opacity: 1;
+  transform: none;
+}
+.eyebrow.st {
+  transform: rotate(-2deg) translateY(16px);
+}
+.scr.on .eyebrow.st {
+  transform: rotate(-2deg);
+}
+.scr.on .st0 { transition-delay: 0.02s; }
+.scr.on .st1 { transition-delay: 0.05s; }
+.scr.on .st2 { transition-delay: 0.12s; }
+.scr.on .st3 { transition-delay: 0.2s; }
+.scr.on .st4 { transition-delay: 0.28s; }
+.scr.on .st5 { transition-delay: 0.36s; }
+.scr.on .st6 { transition-delay: 0.44s; }
+
+/* ---------- badge: centered pill, pin ⇄ calendar crossfade ---------- */
+.ticket {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  margin: 0 auto 26px;
+  border: 1px solid var(--ticket-border);
+  background: var(--ticket-bg);
+  color: var(--accent-sm);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 10px 20px 10px 16px;
+}
+.ticketDot {
+  width: 5px;
+  height: 5px;
+  background: var(--red);
+  border-radius: 1px;
+  transform: rotate(45deg);
+  flex: none;
+}
+.ticketCity {
+  color: var(--text);
+}
+.ticketMorph {
+  position: relative;
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
+.morphPin,
+.morphCal {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.morphPin svg,
+.morphCal svg {
+  width: 17px;
+  height: 17px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* pin holds ~2s, swaps to calendar with a twist, holds ~2s, swaps back.
+   Base styles = pin visible, so reduced-motion shows a static pin. */
+.morphPin {
+  animation: morphPin 5s ease-in-out infinite;
+}
+.morphCal {
+  opacity: 0;
+  animation: morphCal 5s ease-in-out infinite;
+}
+@keyframes morphPin {
+  0%, 38% { opacity: 1; transform: none; }
+  46%, 88% { opacity: 0; transform: rotate(-70deg) scale(0.4); }
+  96%, 100% { opacity: 1; transform: none; }
+}
+@keyframes morphCal {
+  0%, 38% { opacity: 0; transform: rotate(70deg) scale(0.4); }
+  46%, 88% { opacity: 1; transform: none; }
+  96%, 100% { opacity: 0; transform: rotate(70deg) scale(0.4); }
+}
+
+/* ---------- script write-on (two lines, delayed intro) ---------- */
+.scriptWrap {
+  width: min(100%, 330px);
+  margin-bottom: 20px;
+}
+.script {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  transform: rotate(-2deg);
+  transform-origin: left center;
+  /* decorative lettering — the accessible text lives in the SVG's
+     aria-label, so dragging across it shouldn't smear a selection over
+     the artwork (SVG text ignores ::selection colour anyway) */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.scriptStroke,
+.scriptFill {
+  font-family: var(--font-kaushan), cursive;
+  font-size: 72px;
+}
+.scriptL2 {
+  font-size: 54px;
+}
+/* each line settles as it writes — a soft fade+lift under the wipe, so
+   the ink doesn't just hard-scrape into view. Line 2 sits at a slightly
+   livelier angle, the way a second line of handwriting drifts. */
+@keyframes scriptSettle {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+}
+.sLine1,
+.sLine2 {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: scriptSettle 0.75s var(--ease) both;
+}
+.sLine1 {
+  animation-delay: 0.85s;
+}
+.sLine2 {
+  rotate: 2.2deg;
+  animation-delay: 1.95s;
+}
+.scriptStroke {
+  fill: none;
+  stroke: var(--script-stroke);
+  stroke-width: 1.4;
+}
+.scriptFill {
+  fill: var(--red);
+}
+/* the pen: a masked sweep with word plateaus (transform only). The ink
+   layer chases the nib by ~150ms. Line 1 starts after a beat (0.85s),
+   line 2 follows once line 1 has landed. */
+@keyframes write {
+  0% { transform: translateX(-101%); }
+  30% { transform: translateX(-64%); }   /* first word */
+  38% { transform: translateX(-60%); }   /* pen lift */
+  55% { transform: translateX(-37%); }   /* second word */
+  61% { transform: translateX(-34%); }   /* pen lift */
+  100% { transform: translateX(0); }     /* last word */
+}
+.nib {
+  transform-box: fill-box;
+  animation: write 1.05s cubic-bezier(0.5, 0.05, 0.45, 0.95) 0.85s both;
+}
+.nibInk {
+  animation-delay: 1s;
+}
+.nibL2 {
+  animation-duration: 0.8s;
+  animation-delay: 1.95s;
+}
+.nibL2Ink {
+  animation-delay: 2.1s;
+}
+
+/* hand-drawn underline under "and mingle!!!" — a single smooth sweep
+   (no word plateaus), firing once line 2 has finished writing. Base
+   state is fully drawn, so the reduced-motion kill-switch leaves the
+   underline visible rather than erasing it. */
+@keyframes sweep {
+  from {
+    transform: translateX(-102%);
+  }
+}
+.ulineNib {
+  transform-box: fill-box;
+  animation: sweep 0.52s cubic-bezier(0.45, 0.05, 0.3, 1) 2.85s both;
+}
+.underline {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+}
+
+/* ---------- shared screen type ---------- */
+.eyebrow {
+  font-family: var(--font-kaushan), cursive;
+  color: var(--red);
+  font-size: clamp(22px, 6vw, 28px);
+  margin-bottom: 12px;
+  transform: rotate(-2deg);
+  transform-origin: left;
+  width: fit-content;
+}
+/* scrambling name in the email eyebrow — inline-block so the swapping
+   glyphs don't reflow the line around them */
+.scramble {
+  display: inline-block;
+  white-space: pre;
+}
+
+.big {
+  font-family: var(--font-anton), sans-serif;
+  font-weight: 400;
+  font-size: clamp(44px, 12vw, 52px);
+  line-height: 0.98;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+  margin-bottom: 26px;
+}
+.big em {
+  font-style: normal;
+  color: var(--red);
+}
+.lineClip {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.04em; /* Anton overshoot safety */
+}
+@keyframes riseLine {
+  from {
+    transform: translateY(112%);
+  }
+}
+.line1,
+.line2 {
+  display: block;
+  animation: riseLine 0.75s var(--ease) both;
+}
+.line1 { animation-delay: 0.5s; }
+.line2 { animation-delay: 0.62s; }
+
+.sub {
+  color: var(--muted);
+  font-size: clamp(16px, 1.8vw, 18px);
+  line-height: 1.7;
+  font-weight: 500;
+  max-width: 46ch;
+  margin-bottom: 28px;
+  text-wrap: pretty;
+}
+.sub b {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--faint);
+  font-family: var(--font-manrope), sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 8px 10px 8px 0;
+  margin-bottom: 14px;
+  transition: color 0.18s;
+}
+.back svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (hover: hover) and (pointer: fine) {
+  .back:hover {
+    color: var(--text);
+  }
+}
+
+/* ---------- moves strip ---------- */
+.moves {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 36px;
+}
+.moves span {
+  flex: none;
+}
+.moves i {
+  width: 5px;
+  height: 5px;
+  background: var(--red);
+  border-radius: 1px;
+  transform: rotate(45deg);
+  flex: none;
+}
+.moves::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--hairline);
+  margin-left: 8px;
+}
+
+/* ---------- event details (date + venue cards in a row) ---------- */
+.details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--tile-shadow);
+  border-radius: 16px;
+  padding: 16px;
+  transition: border-color 0.18s, transform 0.14s var(--ease);
+}
+.tileIcon {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--icon-bg);
+}
+.tileIcon svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--red);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tileKicker {
+  margin-top: 12px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-sm);
+}
+.tileValue {
+  margin-top: 3px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  color: var(--text);
+}
+.tileLink {
+  text-decoration: none;
+  cursor: pointer;
+}
+.tileLink:active {
+  transform: scale(0.98);
+}
+.tileGo {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+}
+.tileGo svg {
+  width: 15px;
+  height: 15px;
+  stroke: var(--faint);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.18s, transform 0.2s var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tileLink:hover {
+    border-color: var(--ticket-border);
+  }
+  .tileLink:hover .tileGo svg {
+    stroke: var(--red);
+    transform: translate(1px, -1px);
+  }
+}
+
+/* ---------- inputs ---------- */
+.field {
+  margin-bottom: 18px;
+}
+.field input {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
+  border-radius: 14px;
+  padding: 17px 18px;
+  color: var(--text);
+  font-family: var(--font-manrope), sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.field input::placeholder {
+  color: var(--placeholder);
+  font-weight: 500;
+}
+.field input:focus {
+  border-color: var(--red);
+  background: var(--input-focus-bg);
+  box-shadow: 0 0 0 4px rgba(226, 58, 64, 0.15);
+}
+.hint {
+  font-size: 12.5px;
+  color: var(--faint);
+  margin-top: 9px;
+  font-weight: 500;
+}
+.err {
+  color: var(--err);
+}
+
+/* consent */
+.consent {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+.consent input {
+  width: 19px;
+  height: 19px;
+  flex: none;
+  accent-color: var(--red);
+  margin-top: 1px;
+  cursor: pointer;
+}
+
+/* ---------- shared option pieces ---------- */
+.chip {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--icon-bg);
+  transition: background 0.18s;
+}
+.chip svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--red);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.18s;
+}
+.dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex: none;
+  border: 2px solid var(--dot-border);
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+/* ---------- option cards (gadget) ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 11px;
+  margin-bottom: 18px;
+}
+.card {
+  position: relative; /* anchors the selected-state border beam */
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.12s var(--ease), border-color 0.18s, background 0.18s;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: inherit;
+  color: var(--text);
+}
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cardLabel {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+.cardSub {
+  font-weight: 600;
+  color: var(--faint);
+  font-size: 11.5px;
+  line-height: 1.3;
+  margin-top: -7px;
+}
+.card:active {
+  transform: scale(0.965);
+}
+.card.sel {
+  border-color: var(--red);
+  background: var(--sel-bg);
+}
+.card.sel .chip {
+  background: var(--red);
+}
+.card.sel .chip svg {
+  stroke: #fff;
+}
+.card.sel .cardLabel {
+  color: var(--sel-text);
+}
+.card.sel .cardSub {
+  color: var(--sel-small);
+}
+.card.sel .dot {
+  border-color: var(--red);
+  background: var(--red);
+  box-shadow: inset 0 0 0 4px var(--bg);
+}
+
+.wide {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+}
+.dotEnd {
+  margin-left: auto;
+}
+
+/* model field slides in once a gadget is picked */
+.modelField {
+  animation: rise 0.45s var(--ease) both;
+}
+
+/* ---------- option rows (move / timing) ---------- */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.row {
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 12px 16px 12px 12px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 15px;
+  font-weight: 700;
+  transition: transform 0.12s var(--ease), border-color 0.18s, background 0.18s;
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: inherit;
+  color: var(--text);
+  text-align: left;
+  width: 100%;
+}
+.rowMain {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.rowMain small {
+  font-weight: 600;
+  color: var(--faint);
+  font-size: 12.5px;
+}
+.row:active {
+  transform: scale(0.98);
+}
+.rowSel {
+  border-color: var(--red);
+  background: var(--sel-bg);
+}
+.rowSel .chip {
+  background: var(--red);
+}
+.rowSel .chip svg {
+  stroke: #fff;
+}
+.rowSel .dot {
+  border-color: var(--red);
+  background: var(--red);
+  box-shadow: inset 0 0 0 4px var(--bg);
+}
+@media (hover: hover) and (pointer: fine) {
+  .card:not(.sel):hover,
+  .row:not(.rowSel):hover {
+    border-color: var(--ticket-border);
+  }
+}
+
+/* ---------- voucher ---------- */
+.voucher {
+  border: 2px dashed var(--voucher-border);
+  background: var(--voucher-bg);
+  border-radius: 18px;
+  padding: 24px 20px;
+  text-align: center;
+  margin-bottom: 14px;
+  position: relative;
+  transform: perspective(900px) rotateX(24deg) scale(0.85);
+  opacity: 0;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+}
+/* NOTE: `popped` — NOT `.pop`. CSS Modules hashes per class name, and
+   `.pop` was also the contact-popover class; the voucher inherited its
+   absolute positioning and flew out of the layout. Keep this distinct. */
+.voucher.popped {
+  transform: perspective(900px) rotateX(0deg) scale(1);
+  opacity: 1;
+}
+.voucher small {
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  font-weight: 800;
+  color: var(--accent-sm);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 10px;
+}
+.code {
+  font-family: var(--font-anton), sans-serif;
+  font-size: clamp(28px, 8vw, 36px);
+  letter-spacing: 0.12em;
+  color: var(--text);
+}
+.pct {
+  position: absolute;
+  top: -16px;
+  right: 14px;
+  background: var(--red);
+  color: #fff;
+  font-family: var(--font-anton), sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  padding: 7px 13px;
+  border-radius: 999px;
+  transform: rotate(4deg);
+}
+.copybtn {
+  background: none;
+  border: none;
+  color: var(--accent-sm);
+  font-family: var(--font-manrope), sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 6px 10px;
+  transition: transform 0.12s var(--ease), color 0.18s;
+}
+.copybtn:active {
+  transform: scale(0.96);
+}
+.copybtn svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- CTA ---------- */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  background: var(--red);
+  color: #fff;
+  text-decoration: none;
+  border: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  border-radius: 16px;
+  font-family: var(--font-anton), sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 20px 28px;
+  margin-top: 32px;
+  transition: transform 0.14s var(--ease), background 0.18s;
+}
+.cta:active {
+  transform: scale(0.97);
+}
+.cta[disabled] {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.ctaTight {
+  margin-top: 8px;
+}
+.ctaArrow {
+  display: grid;
+  place-items: center;
+  transition: transform 0.2s var(--ease);
+}
+.cta svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ghost {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-size: 14px;
+  padding: 14px;
+  margin-top: 10px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cta:hover {
+    background: var(--red-dark);
+  }
+  .cta:hover .ctaArrow {
+    transform: translateX(4px);
+  }
+  .ghost:hover {
+    background: transparent;
+    border-color: var(--muted);
+  }
+}
+
+/* ---------- footer: typed sign-off + socials ---------- */
+.fine {
+  margin-top: 22px;
+  text-align: center;
+}
+.signOffWrap {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  color: var(--faint);
+  font-weight: 500;
+}
+/* letters land one at a time — clip-path steps, so it stays off the
+   layout path (no width/paint churn) */
+.signOff {
+  display: inline-block;
+  white-space: nowrap;
+}
+.signOffType {
+  clip-path: inset(0 100% 0 0);
+  animation: typeIn 1.55s steps(31, end) 1.5s both;
+}
+@keyframes typeIn {
+  to {
+    clip-path: inset(0 -0.12em 0 0);
+  }
+}
+/* caret shows up while typing, blinks a few times, then retires */
+.caret {
+  width: 1.5px;
+  height: 1.05em;
+  margin-left: 3px;
+  background: var(--red);
+  opacity: 0;
+  animation: caretBlink 0.62s steps(2, jump-none) 1.5s 5, caretOut 0.35s ease 4.6s both;
+}
+@keyframes caretBlink {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes caretOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.social {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.socialBtn {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--social-bg);
+  transition: transform 0.14s var(--ease), background 0.18s;
+}
+.socialBtn svg {
+  width: 19px;
+  height: 19px;
+  fill: #fff;      /* filled glyphs, white in both themes */
+  stroke: none;
+}
+.socialBtn:active {
+  transform: scale(0.92);
+}
+@media (hover: hover) and (pointer: fine) {
+  .socialBtn:hover {
+    background: var(--social-bg-hover);
+  }
+}
+
+/* a11y focus — invisible on touch */
+.themeBtn:focus-visible,
+.cta:focus-visible,
+.back:focus-visible,
+.tileLink:focus-visible,
+.card:focus-visible,
+.row:focus-visible,
+.copybtn:focus-visible,
+.socialBtn:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 3px;
+}
