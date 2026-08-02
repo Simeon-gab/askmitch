@@ -1,8 +1,10 @@
 // Bootstrap the single owner login (docs/DATABASE.md seed step):
 // creates the confirmed auth user, maps it in admin_users, and writes the
-// generated password to .admin-credentials.txt (gitignored). Secrets are
-// never printed to stdout. Re-running rotates the password safely.
-// Run: npx --yes tsx scripts/create-admin.ts [email]
+// password to .admin-credentials.txt (gitignored). Secrets are never
+// printed to stdout. Re-running rotates the password safely.
+// Run: npx --yes tsx scripts/create-admin.ts [email] [password]
+//   - no password arg -> a strong random one is generated
+//   - own password    -> min 10 chars enforced
 import { randomInt } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
@@ -30,8 +32,12 @@ async function main() {
   const url = env("NEXT_PUBLIC_SUPABASE_URL");
   const serviceKey = env("SUPABASE_SERVICE_ROLE_KEY");
   const orgId = env("NEXT_PUBLIC_EVENT_ORG_ID");
-  const email = process.argv[2] ?? "simeonayano209@gmail.com";
-  const password = generatePassword();
+  const email = process.argv[2] ?? "askmitchltd@gmail.com";
+  const chosen = process.argv[3];
+  if (chosen !== undefined && chosen.length < 10) {
+    throw new Error("choose a password of at least 10 characters");
+  }
+  const password = chosen ?? generatePassword();
 
   const supabase = createClient(url, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
