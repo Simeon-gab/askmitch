@@ -14,7 +14,7 @@ export default function SignOutButton() {
   return (
     <button
       type="button"
-      className="ad-btn"
+      className="dash-btn"
       onClick={() => void signOut()}
       suppressHydrationWarning
     >

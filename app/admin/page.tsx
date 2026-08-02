@@ -53,25 +53,25 @@ function Breakdown({
 }) {
   const max = Math.max(1, ...order.map((v) => counts.get(v) ?? 0));
   return (
-    <div className="ad-card">
-      <div className="ad-kpi-label">{title}</div>
+    <div className="dash-card">
+      <div className="dash-kpi-label">{title}</div>
       {order.map((value) => {
         const count = counts.get(value) ?? 0;
         const pct = total === 0 ? 0 : Math.round((count / total) * 100);
         return (
           <div
             key={value}
-            className="ad-bar-row"
+            className="dash-bar-row"
             title={`${labels[value]}: ${count} (${pct}%)`}
           >
-            <span className="ad-bar-label">{labels[value]}</span>
-            <span className="ad-track">
+            <span className="dash-bar-label">{labels[value]}</span>
+            <span className="dash-track">
               <span
-                className="ad-fill"
+                className="dash-fill"
                 style={{ width: `${Math.round((count / max) * 100)}%` }}
               />
             </span>
-            <span className="ad-count">{count}</span>
+            <span className="dash-count">{count}</span>
           </div>
         );
       })}
@@ -172,46 +172,46 @@ export default async function AdminPage({
       : ((GADGET_LABELS as Record<string, string>)[gadget] ?? gadget);
 
   return (
-    <div className="ad">
-      <div className="ad-head">
+    <div className="dash">
+      <div className="dash-head">
         <LogoMark />
-        <div className="ad-actions">
-          <a className="ad-btn primary" href="/api/export">
+        <div className="dash-actions">
+          <a className="dash-btn primary" href="/api/export">
             Export CSV
           </a>
-          <a className="ad-btn" href="/api/export?all=1" title="Includes non-consented leads">
+          <a className="dash-btn" href="/api/export?all=1" title="Includes non-consented leads">
             Export all
           </a>
           <SignOutButton />
         </div>
       </div>
 
-      <div className="ad-grid">
-        <div className="ad-card">
-          <div className="ad-kpi-label">Total signups</div>
-          <div className="ad-kpi">{total}</div>
-          <div className="ad-kpi-sub">+{todayCount} today</div>
+      <div className="dash-grid">
+        <div className="dash-card">
+          <div className="dash-kpi-label">Total signups</div>
+          <div className="dash-kpi">{total}</div>
+          <div className="dash-kpi-sub">+{todayCount} today</div>
         </div>
-        <div className="ad-card">
-          <div className="ad-kpi-label">Redemption rate</div>
-          <div className="ad-kpi">{redemptionRate}%</div>
-          <div className="ad-kpi-sub">
+        <div className="dash-card">
+          <div className="dash-kpi-label">Redemption rate</div>
+          <div className="dash-kpi">{redemptionRate}%</div>
+          <div className="dash-kpi-sub">
             {redeemedCount} of {total} redeemed
           </div>
         </div>
-        <div className="ad-card">
-          <div className="ad-kpi-label">Hot leads</div>
-          <div className="ad-kpi">{hotLeads?.length ?? 0}</div>
-          <div className="ad-kpi-sub">today/this week × buy/swap</div>
+        <div className="dash-card">
+          <div className="dash-kpi-label">Hot leads</div>
+          <div className="dash-kpi">{hotLeads?.length ?? 0}</div>
+          <div className="dash-kpi-sub">today/this week × buy/swap</div>
         </div>
-        <div className="ad-card">
-          <div className="ad-kpi-label">Failed emails</div>
-          <div className="ad-kpi">{failedEmails ?? 0}</div>
-          <div className="ad-kpi-sub">for manual resend later</div>
+        <div className="dash-card">
+          <div className="dash-kpi-label">Failed emails</div>
+          <div className="dash-kpi">{failedEmails ?? 0}</div>
+          <div className="dash-kpi-sub">for manual resend later</div>
         </div>
       </div>
 
-      <div className="ad-grid">
+      <div className="dash-grid">
         <Breakdown
           title="Gadget interest"
           order={GADGETS}
@@ -235,9 +235,9 @@ export default async function AdminPage({
         />
       </div>
 
-      <h2 className="ad-h">Hot leads</h2>
-      <div className="ad-scroll">
-        <table className="ad-table">
+      <h2 className="dash-h">Hot leads</h2>
+      <div className="dash-scroll">
+        <table className="dash-table">
           <thead>
             <tr>
               <th>Name</th>
@@ -255,7 +255,7 @@ export default async function AdminPage({
             ))}
             {(hotLeads ?? []).length === 0 ? (
               <tr>
-                <td colSpan={3} className="ad-empty">
+                <td colSpan={3} className="dash-empty">
                   No hot leads yet.
                 </td>
               </tr>
@@ -264,9 +264,9 @@ export default async function AdminPage({
         </table>
       </div>
 
-      <h2 className="ad-h">Recent registrations</h2>
-      <div className="ad-scroll">
-        <table className="ad-table">
+      <h2 className="dash-h">Recent registrations</h2>
+      <div className="dash-scroll">
+        <table className="dash-table">
           <thead>
             <tr>
               <th>When</th>
@@ -305,7 +305,7 @@ export default async function AdminPage({
             ))}
             {(recent ?? []).length === 0 ? (
               <tr>
-                <td colSpan={9} className="ad-empty">
+                <td colSpan={9} className="dash-empty">
                   No registrations yet.
                 </td>
               </tr>
@@ -313,9 +313,9 @@ export default async function AdminPage({
           </tbody>
         </table>
       </div>
-      <div className="ad-pager">
+      <div className="dash-pager">
         {page > 1 ? (
-          <Link className="ad-btn" href={`/admin?page=${page - 1}`}>
+          <Link className="dash-btn" href={`/admin?page=${page - 1}`}>
             ← Newer
           </Link>
         ) : null}
@@ -323,7 +323,7 @@ export default async function AdminPage({
           Page {page} of {pages} · {recentCount ?? 0} leads
         </span>
         {page < pages ? (
-          <Link className="ad-btn" href={`/admin?page=${page + 1}`}>
+          <Link className="dash-btn" href={`/admin?page=${page + 1}`}>
             Older →
           </Link>
         ) : null}
