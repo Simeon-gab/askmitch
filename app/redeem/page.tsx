@@ -241,10 +241,14 @@ export default function RedeemPage() {
                 <div className="rd-name">{result.name}</div>
                 <div className="rd-meta">
                   Interested in:{" "}
-                  {result.gadget === "other" && result.gadget_other
-                    ? result.gadget_other
-                    : ((GADGET_LABELS as Record<string, string>)[result.gadget] ??
-                      result.gadget)}{" "}
+                  {result.gadget === "other"
+                    ? result.gadget_other ||
+                      (GADGET_LABELS as Record<string, string>)[result.gadget]
+                    : result.gadget_other
+                      ? `${(GADGET_LABELS as Record<string, string>)[result.gadget] ?? result.gadget} · ${result.gadget_other}`
+                      : ((GADGET_LABELS as Record<string, string>)[
+                          result.gadget
+                        ] ?? result.gadget)}{" "}
                   · 5% off
                 </div>
                 <button

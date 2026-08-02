@@ -166,10 +166,12 @@ export default async function AdminPage({
     throw new Error(`email_log query failed: ${failedError.code}`);
   }
 
-  const gadgetLabel = (gadget: string, other: string | null) =>
-    gadget === "other" && other
-      ? other
-      : ((GADGET_LABELS as Record<string, string>)[gadget] ?? gadget);
+  const gadgetLabel = (gadget: string, other: string | null) => {
+    const label =
+      (GADGET_LABELS as Record<string, string>)[gadget] ?? gadget;
+    if (gadget === "other") return other || label;
+    return other ? `${label} · ${other}` : label;
+  };
 
   return (
     <div className="dash">

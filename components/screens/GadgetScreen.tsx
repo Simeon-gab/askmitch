@@ -131,12 +131,16 @@ export default function GadgetScreen({
           <span>Something else</span>
         </button>
       </div>
-      {value === "other" ? (
+      {value !== null ? (
         <div className="field">
           <input
             suppressHydrationWarning
             type="text"
-            placeholder="Tell us what you’re after"
+            placeholder={
+              value === "other"
+                ? "Tell us what you’re after"
+                : "Which model? (optional)"
+            }
             value={otherText}
             data-autofocus
             onChange={(e) => onOtherTextChange(e.target.value)}

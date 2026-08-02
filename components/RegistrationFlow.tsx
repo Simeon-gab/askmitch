@@ -194,8 +194,9 @@ export default function RegistrationFlow({
       email: answers.email.trim(),
       phone: answers.phone.trim() === "" ? null : answers.phone.trim(),
       gadget: answers.gadget,
-      gadget_other:
-        answers.gadget === "other" ? answers.gadgetOther.trim() || null : null,
+      // model text is welcome for ANY gadget (demand-driven stocking);
+      // required for none
+      gadget_other: answers.gadgetOther.trim() || null,
       move: answers.move,
       timing: answers.timing,
       consent: answers.consent,
@@ -354,7 +355,15 @@ export default function RegistrationFlow({
         <GadgetScreen
           value={answers.gadget}
           otherText={answers.gadgetOther}
-          onPick={(gadget) => patch({ gadget })}
+          onPick={(gadget) =>
+            patch({
+              gadget,
+              // switching category clears the previous model text so a
+              // stale "15 Pro Max" never rides along with "Samsung"
+              gadgetOther:
+                gadget === answers.gadget ? answers.gadgetOther : "",
+            })
+          }
           onOtherTextChange={(gadgetOther) => patch({ gadgetOther })}
           onSubmit={() => go(5)}
           onBack={() => go(3)}
