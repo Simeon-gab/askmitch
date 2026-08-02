@@ -56,7 +56,7 @@ export function Cta({
 
 export function LogoMark() {
   return (
-    <div className="mark">
+    <a className="mark" href="/" aria-label="ASKMITCH home">
       <div className="tri">
         <svg viewBox="0 0 100 100" aria-hidden="true">
           <circle
@@ -77,6 +77,6 @@ export function LogoMark() {
         <b>ASKMITCH</b>
         <span>MULTI-VENTURES</span>
       </div>
-    </div>
+    </a>
   );
 }

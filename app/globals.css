@@ -50,7 +50,7 @@ body::before{
   padding:18px 0 10px;
   z-index:5;
 }
-.mark{display:flex;align-items:center;gap:10px}
+.mark{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
 .tri{
   width:34px;height:34px;position:relative;flex:none;
 }

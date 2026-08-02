@@ -374,8 +374,15 @@ function copyText(value: string, onCopied: () => void) {
   onCopied();
 }
 
-function ContactMenu({ mode }: { mode: "whatsapp" | "call" }) {
-  const [open, setOpen] = useState(false);
+function ContactMenu({
+  mode,
+  open,
+  onOpenChange,
+}: {
+  mode: "whatsapp" | "call";
+  open: boolean;
+  onOpenChange: (mode: "whatsapp" | "call" | null) => void;
+}) {
   const [copied, setCopied] = useState<string | null>(null);
   const label = mode === "whatsapp" ? "Message us on WhatsApp" : "Call us";
 
@@ -391,7 +398,7 @@ function ContactMenu({ mode }: { mode: "whatsapp" | "call" }) {
       <button
         type="button"
         className={s.socialBtn}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => onOpenChange(open ? null : mode)}
         aria-label={label}
         aria-expanded={open}
       >
@@ -487,6 +494,8 @@ function VenueMenu({ mapsHref }: { mapsHref: string }) {
 
 /* Sign-off + socials. The line types itself in on the welcome screen. */
 function FooterLine({ typed = false }: { typed?: boolean }) {
+  const [activeContactMenu, setActiveContactMenu] = useState<"whatsapp" | "call" | null>(null);
+
   return (
     <>
       <span className={s.signOffWrap}>
@@ -505,8 +514,16 @@ function FooterLine({ typed = false }: { typed?: boolean }) {
         >
           <InstagramGlyph />
         </a>
-        <ContactMenu mode="whatsapp" />
-        <ContactMenu mode="call" />
+        <ContactMenu
+          mode="whatsapp"
+          open={activeContactMenu === "whatsapp"}
+          onOpenChange={setActiveContactMenu}
+        />
+        <ContactMenu
+          mode="call"
+          open={activeContactMenu === "call"}
+          onOpenChange={setActiveContactMenu}
+        />
       </span>
     </>
   );
@@ -777,7 +794,7 @@ export default function RegistrationFlow({
 
       <div className={s.frame}>
         <header className={s.top}>
-          <div className={s.mark}>
+          <a className={s.mark} href="/" aria-label="ASKMITCH home">
             <div className={s.tri}>
               <TriMark />
             </div>
@@ -785,7 +802,7 @@ export default function RegistrationFlow({
               <b>ASKMITCH</b>
               <span>MULTI-VENTURES</span>
             </div>
-          </div>
+          </a>
 
           <div className={s.topRight}>
             {step > 0 && step < 7 ? (
