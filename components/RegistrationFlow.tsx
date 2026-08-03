@@ -84,6 +84,41 @@ async function postRegistration(
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
+// Returning guests (personal devices only — NEVER the kiosk, which is a
+// shared screen) are greeted with their existing voucher instead of a
+// second walk through the flow. Cleared storage or a new device simply
+// falls back to the normal flow, where the server's email dedupe returns
+// the same code anyway.
+const VIP_STORAGE_KEY = "askmitch_vip";
+
+interface StoredVip {
+  name: string;
+  code: string;
+  expires_at: string;
+}
+
+function readStoredVip(): StoredVip | null {
+  try {
+    const raw = window.localStorage.getItem(VIP_STORAGE_KEY);
+    if (!raw) return null;
+    const vip = JSON.parse(raw) as StoredVip;
+    if (!vip?.code || new Date(vip.expires_at).getTime() < Date.now()) {
+      return null;
+    }
+    return vip;
+  } catch {
+    return null;
+  }
+}
+
+function formatVipExpiry(iso: string): string {
+  return new Intl.DateTimeFormat("en-NG", {
+    timeZone: "Africa/Lagos",
+    day: "numeric",
+    month: "long",
+  }).format(new Date(iso));
+}
+
 const MAPS_QUERY = encodeURIComponent(
   "Sims Plaza, Olakunle Junction, Bembo, Alao Akala Expressway, Apata Road, Ibadan",
 );
@@ -571,6 +606,13 @@ export default function RegistrationFlow({
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [activeQuickMenu, setActiveQuickMenu] = useState<QuickMenu>(null);
 
+  // Read the remembered registration after mount (localStorage is
+  // client-only); kiosk devices never remember anyone.
+  useEffect(() => {
+    if (kiosk) return;
+    setVip(readStoredVip());
+  }, [kiosk]);
+
   // A tap anywhere outside an open WhatsApp/call/venue popover (or Escape)
   // dismisses it — the popovers must never sit static over the page.
   useEffect(() => {
@@ -608,6 +650,8 @@ export default function RegistrationFlow({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [voucherCode, setVoucherCode] = useState<string | null>(null);
   const [voucherPop, setVoucherPop] = useState(false);
+  const [vip, setVip] = useState<StoredVip | null>(null);
+  const [vipCopied, setVipCopied] = useState(false);
   const [copied, setCopied] = useState(false);
   const [kioskCountdown, setKioskCountdown] = useState<number | null>(null);
   const [stillThere, setStillThere] = useState(false);
@@ -795,6 +839,19 @@ export default function RegistrationFlow({
       return;
     }
     setVoucherCode(result.data.code);
+    if (!kiosk) {
+      const stored: StoredVip = {
+        name: name.trim().split(" ")[0] ?? "",
+        code: result.data.code,
+        expires_at: result.data.expires_at,
+      };
+      try {
+        window.localStorage.setItem(VIP_STORAGE_KEY, JSON.stringify(stored));
+      } catch {
+        // private browsing — the flow still works, we just won't remember
+      }
+      setVip(stored);
+    }
     go(7);
   };
 
@@ -1021,6 +1078,49 @@ export default function RegistrationFlow({
                 onOpenChange={setActiveQuickMenu}
               />
             </div>
+
+            {vip ? (
+              <div className={s.vipBack}>
+                <span className={s.vipKicker}>
+                  You&rsquo;re already on the VIP guest list
+                  {vip.name ? `, ${vip.name}` : ""}!
+                </span>
+                <span className={s.vipRow}>
+                  <b className={s.vipCode}>{vip.code}</b>
+                  <button
+                    type="button"
+                    className={s.vipCopy}
+                    suppressHydrationWarning
+                    onClick={() =>
+                      copyText(vip.code, () => {
+                        setVipCopied(true);
+                        window.setTimeout(() => setVipCopied(false), 1600);
+                      })
+                    }
+                  >
+                    {vipCopied ? "Copied" : "Copy"}
+                  </button>
+                </span>
+                <span className={s.vipFine}>
+                  Show it at the counter — valid till{" "}
+                  {formatVipExpiry(vip.expires_at)}. Registering someone else?
+                  Just hit Let&rsquo;s go.{" "}
+                  <button
+                    type="button"
+                    className={s.vipClear}
+                    suppressHydrationWarning
+                    onClick={() => {
+                      try {
+                        window.localStorage.removeItem(VIP_STORAGE_KEY);
+                      } catch {}
+                      setVip(null);
+                    }}
+                  >
+                    Not you?
+                  </button>
+                </span>
+              </div>
+            ) : null}
 
             <button type="button" className={s.cta} suppressHydrationWarning onClick={() => go(1)}>
               Let&rsquo;s go
