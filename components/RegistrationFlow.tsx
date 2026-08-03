@@ -84,7 +84,9 @@ async function postRegistration(
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-const MAPS_QUERY = encodeURIComponent("Sims Plaza, Apata Road, Ibadan");
+const MAPS_QUERY = encodeURIComponent(
+  "Sims Plaza, Olakunle Junction, Bembo, Alao Akala Expressway, Apata Road, Ibadan",
+);
 const MAPS_FALLBACK = `https://www.google.com/maps/search/?api=1&query=${MAPS_QUERY}`;
 
 // Platform-specific maps deep link. Android gets `geo:` so the OS shows its
@@ -394,7 +396,7 @@ function ContactMenu({
   };
 
   return (
-    <span className={s.contactControl}>
+    <span className={s.contactControl} data-quickmenu="">
       <button
         type="button"
         className={s.socialBtn}
@@ -454,7 +456,7 @@ function VenueMenu({
   const [copied, setCopied] = useState(false);
 
   return (
-    <div className={`${s.tile} ${s.tileLink} ${s.venueTile}`}>
+    <div className={`${s.tile} ${s.tileLink} ${s.venueTile}`} data-quickmenu="">
       <button
         type="button"
         className={s.tileTrigger}
@@ -568,6 +570,26 @@ export default function RegistrationFlow({
 }) {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [activeQuickMenu, setActiveQuickMenu] = useState<QuickMenu>(null);
+
+  // A tap anywhere outside an open WhatsApp/call/venue popover (or Escape)
+  // dismisses it — the popovers must never sit static over the page.
+  useEffect(() => {
+    if (activeQuickMenu === null) return;
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Element | null;
+      if (target?.closest?.("[data-quickmenu]")) return;
+      setActiveQuickMenu(null);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setActiveQuickMenu(null);
+    };
+    window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [activeQuickMenu]);
   const [step, setStep] = useState(0);
   const [leaving, setLeaving] = useState<number | null>(null);
   const [dir, setDir] = useState<"fwd" | "back">("fwd");
