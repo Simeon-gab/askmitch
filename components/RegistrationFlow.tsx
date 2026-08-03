@@ -361,7 +361,12 @@ const GADGET_CARDS: { value: Gadget; label: string; sub: string; icon: ReactNode
 const SIGN_OFF = "Tech, Style, Askmitch Anything…";
 const INSTAGRAM_URL = "https://instagram.com/Askmitch_multiventures";
 const STORE_ADDRESS = "Sims Plaza, Olakunle Junction, Bembo, Alao Akala Expressway, Apata Road, Ibadan";
-const CONTACT_NUMBERS = ["07012806727", "008101799537"] as const;
+// Per the printed flyer these are two DIFFERENT lines: calls go to one
+// number, WhatsApp to the other. Displayed in local format; hrefs use the
+// international form (wa.me refuses leading-zero local numbers).
+const CALL_NUMBERS = ["07012806727"] as const;
+const WHATSAPP_NUMBERS = ["08101799537"] as const;
+const intlDigits = (local: string) => `234${local.slice(1)}`;
 type QuickMenu = "whatsapp" | "call" | "venue" | null;
 
 function copyText(value: string, onCopied: () => void) {
@@ -402,7 +407,7 @@ function ContactMenu({
       {open ? (
         <span className={s.contactPop} role="dialog" aria-label={label}>
           <span className={s.contactTitle}>{mode === "whatsapp" ? "Message on WhatsApp" : "Call ASKMITCH"}</span>
-          {CONTACT_NUMBERS.map((number) => (
+          {(mode === "whatsapp" ? WHATSAPP_NUMBERS : CALL_NUMBERS).map((number) => (
             <span className={s.contactRow} key={number}>
               <span>
                 <b>{number}</b>
@@ -417,7 +422,11 @@ function ContactMenu({
                 </button>
                 <a
                   className={s.contactOpen}
-                  href={mode === "whatsapp" ? `https://wa.me/${number}` : `tel:${number}`}
+                  href={
+                    mode === "whatsapp"
+                      ? `https://wa.me/${intlDigits(number)}`
+                      : `tel:+${intlDigits(number)}`
+                  }
                   target={mode === "whatsapp" ? "_blank" : undefined}
                   rel={mode === "whatsapp" ? "noopener noreferrer" : undefined}
                   aria-label={mode === "whatsapp" ? `Message ${number} on WhatsApp` : `Call ${number}`}
