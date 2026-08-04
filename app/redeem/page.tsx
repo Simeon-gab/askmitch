@@ -9,12 +9,12 @@
 // and checks it automatically once the station is unlocked.
 import { useEffect, useRef, useState } from "react";
 import { LogoMark } from "@/components/screens/shared";
-import { GADGET_LABELS } from "@/lib/options";
+import { formatGadgets } from "@/lib/options";
 
 const PIN_STORAGE_KEY = "askmitch_redeem_pin";
 
 type RedeemResult =
-  | { state: "valid"; name: string; gadget: string; gadget_other: string | null }
+  | { state: "valid"; name: string; gadgets: string[]; gadget_other: string | null }
   | { state: "redeemed"; redeemed_at: string | null; name: string }
   | { state: "expired"; expires_at: string; name: string }
   | { state: "invalid" }
@@ -257,16 +257,7 @@ export default function RedeemPage() {
                 <span className="pill ok">Valid</span>
                 <div className="rd-name">{result.name}</div>
                 <div className="rd-meta">
-                  Interested in:{" "}
-                  {result.gadget === "other"
-                    ? result.gadget_other ||
-                      (GADGET_LABELS as Record<string, string>)[result.gadget]
-                    : result.gadget_other
-                      ? `${(GADGET_LABELS as Record<string, string>)[result.gadget] ?? result.gadget} · ${result.gadget_other}`
-                      : ((GADGET_LABELS as Record<string, string>)[
-                          result.gadget
-                        ] ?? result.gadget)}{" "}
-                  · 5% off
+                  Interested in: {formatGadgets(result.gadgets, result.gadget_other)} · 5% off
                 </div>
                 <button
                   type="button"

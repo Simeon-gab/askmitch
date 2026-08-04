@@ -22,7 +22,7 @@ async function register(i: number) {
       name: `Load Test ${i}`,
       email: `${RUN}-${i}@example.invalid`,
       phone: "0801 234 5678",
-      gadget: "iphone",
+      gadgets: ["iphone"],
       move: "buy",
       timing: "today",
       consent: true,

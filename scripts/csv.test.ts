@@ -10,7 +10,7 @@ const csv = buildLeadsCsv([
     email: "tj@x.ng",
     phone: "0801 234 5678",
     phone_e164: "+2348012345678",
-    gadget: "iphone",
+    gadgets: ["iphone", "laptop"],
     gadget_other: null,
     move: "buy",
     timing: "today",
@@ -29,6 +29,7 @@ const row = lines[1];
 assert.ok(row.includes('"=""0801 234 5678"""'), "phone Excel text-wrapped");
 assert.ok(row.includes('"=""+2348012345678"""'), "e164 Excel text-wrapped");
 assert.ok(row.includes('"Tunde ""TJ"" Bakare"'), "embedded quotes doubled");
+assert.ok(row.includes('"iphone, laptop"'), "gadgets array joined in one cell");
 assert.ok(row.includes('"true"'), "consent serialized");
 assert.ok(csv.endsWith("\r\n"), "CRLF endings");
 console.log("PASS csv: quoting, Excel-safe phones, quote doubling, CRLF");

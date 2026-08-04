@@ -12,6 +12,7 @@ import {
   MOVE_LABELS,
   TIMINGS,
   TIMING_LABELS,
+  formatGadgets,
 } from "@/lib/options";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -100,7 +101,7 @@ export default async function AdminPage({
   // One lean scan powers all the aggregate widgets (event scale: hundreds).
   const { data: statRows, error: statError } = await supabase
     .from("leads")
-    .select("gadget, move, timing, redeemed_at, created_at")
+    .select("gadget, gadgets, move, timing, redeemed_at, created_at")
     .eq("org_id", orgId);
   if (statError) {
     throw new Error(`stats query failed: ${statError.code}`);
@@ -115,19 +116,27 @@ export default async function AdminPage({
   const redemptionRate =
     total === 0 ? 0 : Math.round((redeemedCount / total) * 100);
 
-  const countBy = (field: "gadget" | "move" | "timing") => {
+  const countBy = (field: "move" | "timing") => {
     const map = new Map<string, number>();
     for (const row of rows) {
       map.set(row[field], (map.get(row[field]) ?? 0) + 1);
     }
     return map;
   };
+  // A lead counts under EACH gadget it picked, so gadget percentages can sum
+  // past 100 — that's the nature of multi-select, not a bug.
+  const gadgetCounts = new Map<string, number>();
+  for (const row of rows) {
+    for (const g of row.gadgets ?? [row.gadget]) {
+      gadgetCounts.set(g, (gadgetCounts.get(g) ?? 0) + 1);
+    }
+  }
 
   // Hot leads: at the counter today/this week, buying or swapping
   // (docs/DATABASE.md segment query).
   const { data: hotLeads, error: hotError } = await supabase
     .from("leads")
-    .select("id, name, phone, phone_e164, gadget, gadget_other")
+    .select("id, name, phone, phone_e164, gadget, gadgets, gadget_other")
     .eq("org_id", orgId)
     .in("timing", ["today", "this_week"])
     .in("move", ["buy", "swap"])
@@ -146,7 +155,7 @@ export default async function AdminPage({
   } = await supabase
     .from("leads")
     .select(
-      "id, name, email, gadget, move, timing, source, consent, redeemed_at, created_at",
+      "id, name, email, gadget, gadgets, move, timing, source, consent, redeemed_at, created_at",
       { count: "exact" },
     )
     .eq("org_id", orgId)
@@ -166,12 +175,9 @@ export default async function AdminPage({
     throw new Error(`email_log query failed: ${failedError.code}`);
   }
 
-  const gadgetLabel = (gadget: string, other: string | null) => {
-    const label =
-      (GADGET_LABELS as Record<string, string>)[gadget] ?? gadget;
-    if (gadget === "other") return other || label;
-    return other ? `${label} · ${other}` : label;
-  };
+  // Fallback covers rows written by a pre-multiselect deploy (0002 note).
+  const leadGadgets = (lead: { gadgets: string[] | null; gadget: string }) =>
+    lead.gadgets ?? [lead.gadget];
 
   return (
     <div className="dash">
@@ -215,7 +221,7 @@ export default async function AdminPage({
           title="Gadget interest"
           order={GADGETS}
           labels={GADGET_LABELS}
-          counts={countBy("gadget")}
+          counts={gadgetCounts}
           total={total}
         />
         <Breakdown
@@ -249,7 +255,7 @@ export default async function AdminPage({
               <tr key={lead.id}>
                 <td>{lead.name}</td>
                 <td>{lead.phone_e164 ?? lead.phone ?? "—"}</td>
-                <td>{gadgetLabel(lead.gadget, lead.gadget_other)}</td>
+                <td>{formatGadgets(leadGadgets(lead), lead.gadget_other)}</td>
               </tr>
             ))}
             {(hotLeads ?? []).length === 0 ? (
@@ -285,10 +291,7 @@ export default async function AdminPage({
                 <td>{formatWhen(lead.created_at)}</td>
                 <td>{lead.name}</td>
                 <td>{lead.email}</td>
-                <td>
-                  {(GADGET_LABELS as Record<string, string>)[lead.gadget] ??
-                    lead.gadget}
-                </td>
+                <td>{formatGadgets(leadGadgets(lead), null)}</td>
                 <td>
                   {(MOVE_LABELS as Record<string, string>)[lead.move] ??
                     lead.move}

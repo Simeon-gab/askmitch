@@ -9,7 +9,7 @@ export const LEAD_EXPORT_COLUMNS = [
   "email",
   "phone",
   "phone_e164",
-  "gadget",
+  "gadgets",
   "gadget_other",
   "move",
   "timing",
@@ -25,7 +25,10 @@ const EXCEL_TEXT_COLUMNS = new Set<string>(["phone", "phone_e164"]);
 
 function quoted(value: unknown): string {
   if (value === null || value === undefined) return '""';
-  return `"${String(value).replaceAll('"', '""')}"`;
+  // gadgets is a Postgres array — "iphone, laptop" reads better in Excel
+  // than the default "iphone,laptop" String() form.
+  const s = Array.isArray(value) ? value.join(", ") : String(value);
+  return `"${s.replaceAll('"', '""')}"`;
 }
 
 function excelText(value: unknown): string {

@@ -96,6 +96,7 @@ export type Database = {
           expires_at: string
           gadget: string
           gadget_other: string | null
+          gadgets: string[] | null
           id: string
           move: string
           name: string
@@ -114,6 +115,7 @@ export type Database = {
           expires_at: string
           gadget: string
           gadget_other?: string | null
+          gadgets?: string[] | null
           id?: string
           move: string
           name: string
@@ -132,6 +134,7 @@ export type Database = {
           expires_at?: string
           gadget?: string
           gadget_other?: string | null
+          gadgets?: string[] | null
           id?: string
           move?: string
           name?: string

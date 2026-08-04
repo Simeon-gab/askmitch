@@ -21,8 +21,13 @@ create table leads (
   email text not null,
   phone text,                              -- raw as entered; normalized copy below
   phone_e164 text,                         -- +234... when derivable, else null
+  -- gadget interest is MULTI-select since 2026-08-04 (migration 0002).
+  -- `gadgets` is the source of truth; legacy `gadget` (= gadgets[1]) is
+  -- still written for rollout safety and drops in a post-event cleanup.
   gadget text not null check (gadget in ('iphone','samsung','laptop','audio','watch','gaming','other')),
-  gadget_other text,                       -- free text when gadget = 'other'
+  gadgets text[] check (gadgets is null or (array_length(gadgets, 1) >= 1
+    and gadgets <@ array['iphone','samsung','laptop','audio','watch','gaming','other']::text[])),
+  gadget_other text,                       -- free text when gadgets includes 'other'
   move text not null check (move in ('buy','sell','swap','browsing')),
   timing text not null check (timing in ('today','this_week','this_month','someday')),
   consent boolean not null default false,
@@ -66,6 +71,7 @@ create table rate_limits (
 ```sql
 create index leads_org_created_idx on leads (org_id, created_at desc);
 create index leads_org_gadget_idx on leads (org_id, gadget);
+create index leads_org_gadgets_idx on leads using gin (gadgets);  -- migration 0002
 create index leads_org_timing_idx on leads (org_id, timing);
 create index leads_org_move_idx on leads (org_id, move);
 create index leads_voucher_lookup_idx on leads (org_id, upper(voucher_code));
@@ -117,18 +123,19 @@ insert into admin_users (user_id, org_id) values ('<owner-auth-uid>', '<askmitch
 
 ```sql
 -- Hot leads: at the counter today or this week, buying or swapping
-select name, phone_e164, gadget from leads
+select name, phone_e164, gadgets from leads
 where org_id = $1 and timing in ('today','this_week') and move in ('buy','swap');
 
 -- Unredeemed voucher reminder list (send day 10)
 select name, email, voucher_code, expires_at from leads
 where org_id = $1 and redeemed_at is null and consent = true and expires_at > now();
 
--- Interest segment for a category promo
+-- Interest segment for a category promo (matches any lead whose list
+-- includes the category — the GIN index serves this)
 select name, email from leads
-where org_id = $1 and gadget = $2 and consent = true;
+where org_id = $1 and gadgets @> array[$2]::text[] and consent = true;
 
 -- Sellers/swappers (inventory acquisition pipeline)
-select name, phone_e164, gadget from leads
+select name, phone_e164, gadgets from leads
 where org_id = $1 and move in ('sell','swap');
 ```

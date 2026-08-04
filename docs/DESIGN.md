@@ -48,7 +48,7 @@ Header bar: logo left, step counter right (`01 / 06`, current number red). Below
 | 1 | Name | First things first… | Who's on the GUEST LIST? | Every VIP has a name. What should we call you? |
 | 2 | Email | Nice to meet you, {first}! | Where do we send your 5% VOUCHER? | Your code drops in your inbox the second you finish. No spam — just deals worth opening. |
 | 3 | WhatsApp | Deals move fast here… | Drop your WHATSAPP | Flash deals, restock alerts, swap offers — the good stuff goes to WhatsApp first. |
-| 4 | Gadget | Real talk… | Which gadget is CALLING YOU right now? | Pick the one you're most likely to buy next — we'll make sure it's waiting for you. |
+| 4 | Gadget | Real talk… | Which gadgets are CALLING YOU right now? | Pick as many as you like — we'll make sure they're waiting for you. |
 | 5 | Move | We buy · We sell · We swap | What's the MOVE? | However you play it, there's a deal for you today. |
 | 6 | Timing | Last one, promise… | When are you making it HAPPEN? | Be honest — your voucher works either way. |
 | 7 | Voucher | You're in, {first}! | Welcome to the FAMILY | Show this at the counter — or find it in your email. Valid for **14 days**. |
@@ -58,7 +58,7 @@ Welcome screen extras: pulsing badge "OPENING DAY · IBADAN", meta row ("Sat, 8t
 CTA labels per screen: Let's go → That's me → Lock it in → Continue → Noted → Continue → Get my 5% voucher. Voucher screen ghost button: "Register another guest" (kiosk); on personal phones instead show "Follow @Askmitch_multiventures" linking to Instagram.
 
 Option sets:
-- Gadget (2-col icon cards): iPhone, Samsung, Laptop, Audio & speakers, Smartwatch, Gaming. Add a 7th "Something else" card in production that reveals a small free-text input (maps to gadget='other' + gadget_other).
+- Gadget (2-col icon cards, MULTI-select since 2026-08-04 — tap toggles, at least one required): iPhone, Samsung, Laptop, Audio & speakers, Smartwatch, Gaming. Add a 7th "Something else" card in production that reveals a small free-text input (maps to 'other' in gadgets + gadget_other).
 - Move (rows with radio dots): Buying *(brand new or premium used)* / Selling *(my current device)* / Swapping *(trade up to better)* / Just vibing *(here for the party)*.
 - Timing (rows): Today *(while I'm here!)* / This week / This month / Someday soon.
 

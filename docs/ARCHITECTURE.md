@@ -43,8 +43,8 @@ Request:
   "name": "Tunde Bakare",
   "email": "tunde@example.com",
   "phone": "08012345678",
-  "gadget": "iphone",          // iphone | samsung | laptop | audio | watch | gaming | other
-  "gadget_other": null,         // free text when gadget = other
+  "gadgets": ["iphone"],       // 1+ of: iphone | samsung | laptop | audio | watch | gaming | other (multi-select since 2026-08-04)
+  "gadget_other": null,         // free text when gadgets includes "other"
   "move": "swap",               // buy | sell | swap | browsing
   "timing": "today",            // today | this_week | this_month | someday
   "consent": true,

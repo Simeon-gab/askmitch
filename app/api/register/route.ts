@@ -161,7 +161,10 @@ export async function POST(request: Request) {
         email,
         phone,
         phone_e164: phoneE164,
-        gadget: input.gadget,
+        gadgets: input.gadgets,
+        // legacy single column (first selection) — kept until the
+        // post-event cleanup migration drops it (0002 rollout note)
+        gadget: input.gadgets[0],
         // free text rides with any gadget: the model for named categories,
         // the description for 'other' (demand-driven stocking signal)
         gadget_other: input.gadget_other?.trim() || null,

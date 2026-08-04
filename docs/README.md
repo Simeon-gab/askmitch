@@ -31,7 +31,7 @@ Guest (phone/QR/kiosk) → Registration flow → Lead record (tagged) → Vouche
 
 1. **Unique voucher code per registration**, generated server-side, never client-side. Format `MITCH-XXXXX` (5 chars from unambiguous alphabet, no 0/O/1/I).
 2. **Dedupe on email**: one registration = one code. Re-registering with the same email returns the existing code, does not create a new lead.
-3. **Two demand questions**: gadget interest (single-select, maps to real inventory categories) and buy/sell/swap intent. Plus purchase timing. These three tags are the marketing leverage.
+3. **Two demand questions**: gadget interest (multi-select, maps to real inventory categories; changed from single-select by owner decision 2026-08-04 — migration 0002) and buy/sell/swap intent. Plus purchase timing. These three tags are the marketing leverage.
 4. **Voucher email is the email-validity check.** Sent immediately on registration via Resend. Code also shown on-screen.
 5. **Consent checkbox required** for marketing (NDPA compliance). Stored on the lead. Transactional voucher email sends regardless; marketing sends only to consented leads.
 6. **Manual redemption at POS**: staff page validates the code and marks redeemed. No POS integration for v1.

@@ -41,3 +41,19 @@ export const TIMING_LABELS: Record<Timing, string> = {
   this_month: "This month",
   someday: "Someday soon",
 };
+
+// One display string for a lead's gadget list (staff/admin surfaces).
+// 'other' is replaced by the free text when present; free text alongside
+// named gadgets is appended as the model note ("iPhone · Laptop · 16 Pro Max").
+export function formatGadgets(
+  gadgets: readonly string[],
+  other: string | null,
+): string {
+  const labels = gadgets.map((g) =>
+    g === "other"
+      ? other || GADGET_LABELS.other
+      : ((GADGET_LABELS as Record<string, string>)[g] ?? g),
+  );
+  if (other && !gadgets.includes("other")) labels.push(other);
+  return labels.join(" · ");
+}

@@ -641,8 +641,13 @@ export default function RegistrationFlow({
   const [emailError, setEmailError] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
   const [consent, setConsent] = useState(true); // default checked (DESIGN.md)
-  const [gadget, setGadget] = useState<Gadget | null>(null);
+  // Multi-select (owner decision 2026-08-04): tap toggles, order = tap order.
+  const [gadgets, setGadgets] = useState<Gadget[]>([]);
   const [gadgetOther, setGadgetOther] = useState("");
+  const toggleGadget = (g: Gadget) =>
+    setGadgets((prev) =>
+      prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g],
+    );
   const [move, setMove] = useState<Move | null>(null);
   const [timing, setTiming] = useState<Timing | null>(null);
   const [company, setCompany] = useState(""); // honeypot — humans never see it
@@ -752,7 +757,7 @@ export default function RegistrationFlow({
         name !== "" ||
         email !== "" ||
         phone !== "" ||
-        gadget !== null ||
+        gadgets.length > 0 ||
         move !== null ||
         timing !== null ||
         !consent;
@@ -762,7 +767,7 @@ export default function RegistrationFlow({
       }
     }, 1000);
     return () => window.clearInterval(interval);
-  }, [kiosk, stillThere, step, name, email, phone, gadget, move, timing, consent]);
+  }, [kiosk, stillThere, step, name, email, phone, gadgets, move, timing, consent]);
 
   // Overlay: reset to welcome after 10 more seconds, wiping everything.
   useEffect(() => {
@@ -813,7 +818,7 @@ export default function RegistrationFlow({
   const submit = async () => {
     if (submitting) return;
     // The disabled CTAs make these impossible; guard anyway for type safety.
-    if (!gadget || !move || !timing) return;
+    if (gadgets.length === 0 || !move || !timing) return;
     setSubmitError(null);
 
     // Mirrors lib/validation.ts — which the server re-runs on every request.
@@ -821,7 +826,7 @@ export default function RegistrationFlow({
       name: name.trim(),
       email: email.trim(),
       phone: phone.trim() === "" ? null : phone.trim(),
-      gadget,
+      gadgets,
       // model text is welcome for ANY gadget (demand-driven stocking)
       gadget_other: gadgetOther.trim() || null,
       move,
@@ -864,7 +869,7 @@ export default function RegistrationFlow({
     setEmailError(null);
     setPhone("");
     setConsent(true);
-    setGadget(null);
+    setGadgets([]);
     setGadgetOther("");
     setMove(null);
     setTiming(null);
@@ -1310,25 +1315,22 @@ export default function RegistrationFlow({
             </button>
             <div className={`${s.eyebrow} ${s.st} ${s.st1}`}>Real talk…</div>
             <h1 className={`${s.big} ${s.st} ${s.st2}`}>
-              Which gadget is <em>calling you</em> right now?
+              Which gadgets are <em>calling you</em> right now?
             </h1>
             <p className={`${s.sub} ${s.st} ${s.st3}`}>
-              Pick the one you&rsquo;re most likely to buy next — we&rsquo;ll
-              make sure it&rsquo;s waiting for you.
+              Pick as many as you like — we&rsquo;ll make sure they&rsquo;re
+              waiting for you.
             </p>
-            <div className={`${s.grid} ${s.st} ${s.st4}`} role="radiogroup" aria-label="Gadget">
+            <div className={`${s.grid} ${s.st} ${s.st4}`} role="group" aria-label="Gadgets">
               {GADGET_CARDS.map((card) => (
                 <button
                   suppressHydrationWarning
                   type="button"
                   key={card.value}
-                  className={gadget === card.value ? `${s.card} ${s.sel}` : s.card}
-                  role="radio"
-                  aria-checked={gadget === card.value}
-                  onClick={() => {
-                    setGadget(card.value);
-                    if (gadget !== card.value) setGadgetOther("");
-                  }}
+                  className={gadgets.includes(card.value) ? `${s.card} ${s.sel}` : s.card}
+                  role="checkbox"
+                  aria-checked={gadgets.includes(card.value)}
+                  onClick={() => toggleGadget(card.value)}
                 >
                   <span className={s.cardTop}>
                     <span className={s.chip}>{card.icon}</span>
@@ -1342,13 +1344,13 @@ export default function RegistrationFlow({
                 suppressHydrationWarning
                 type="button"
                 className={
-                  gadget === "other" ? `${s.card} ${s.wide} ${s.sel}` : `${s.card} ${s.wide}`
+                  gadgets.includes("other") ? `${s.card} ${s.wide} ${s.sel}` : `${s.card} ${s.wide}`
                 }
-                role="radio"
-                aria-checked={gadget === "other"}
+                role="checkbox"
+                aria-checked={gadgets.includes("other")}
                 onClick={() => {
-                  if (gadget !== "other") setGadgetOther("");
-                  setGadget("other");
+                  if (gadgets.includes("other")) setGadgetOther("");
+                  toggleGadget("other");
                 }}
               >
                 <span className={s.chip}>
@@ -1361,20 +1363,20 @@ export default function RegistrationFlow({
                 <i className={`${s.dot} ${s.dotEnd}`} />
               </button>
             </div>
-            {gadget !== null ? (
+            {gadgets.length > 0 ? (
               <div className={`${s.field} ${s.modelField}`}>
                 <input
                   suppressHydrationWarning
                   type="text"
                   placeholder={
-                    gadget === "other"
+                    gadgets.includes("other")
                       ? "Tell us what you’re after"
                       : "Which model? (optional)"
                   }
                   value={gadgetOther}
                   onChange={(e) => setGadgetOther(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && gadget !== null) go(5);
+                    if (e.key === "Enter" && gadgets.length > 0) go(5);
                   }}
                 />
               </div>
@@ -1383,7 +1385,7 @@ export default function RegistrationFlow({
               type="button"
               className={`${s.cta} ${s.ctaTight} ${s.st} ${s.st5}`}
               suppressHydrationWarning
-              disabled={gadget === null}
+              disabled={gadgets.length === 0}
               onClick={() => go(5)}
             >
               Noted

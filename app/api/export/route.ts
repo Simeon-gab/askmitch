@@ -21,9 +21,11 @@ export async function GET(request: Request) {
   }
 
   const all = new URL(request.url).searchParams.get("all") === "1";
+  // Legacy `gadget` rides along only to backfill `gadgets` for any row
+  // written by a pre-multiselect deploy (migration 0002 rollout note).
   let query = supabase
     .from("leads")
-    .select(LEAD_EXPORT_COLUMNS.join(","))
+    .select(LEAD_EXPORT_COLUMNS.join(",") + ",gadget")
     .eq("org_id", orgId)
     .order("created_at", { ascending: true });
   if (!all) {
@@ -35,7 +37,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }
 
-  const csv = buildLeadsCsv((data ?? []) as unknown as Record<string, unknown>[]);
+  const rows = ((data ?? []) as unknown as Record<string, unknown>[]).map(
+    (row) => ({ ...row, gadgets: row.gadgets ?? [row.gadget] }),
+  );
+  const csv = buildLeadsCsv(rows);
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Africa/Lagos",
   }).format(new Date());

@@ -17,7 +17,12 @@ export const registrationSchema = z.object({
     .email("Hmm, that email doesn’t look right — double-check it")
     .max(254),
   phone: z.string().trim().max(32).optional().nullable(),
-  gadget: z.enum(GADGETS),
+  // Multi-select (owner decision 2026-08-04): at least one, no duplicates.
+  gadgets: z
+    .array(z.enum(GADGETS))
+    .min(1, "Pick at least one gadget")
+    .max(GADGETS.length)
+    .transform((list) => [...new Set(list)]),
   gadget_other: z.string().trim().max(120).optional().nullable(),
   move: z.enum(MOVES),
   timing: z.enum(TIMINGS),

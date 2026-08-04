@@ -22,7 +22,7 @@ function payload(email: string, overrides: Record<string, unknown> = {}) {
     name: "Tunde Bakare",
     email,
     phone: "0801 234 5678",
-    gadget: "iphone",
+    gadgets: ["iphone"],
     gadget_other: null,
     move: "swap",
     timing: "today",

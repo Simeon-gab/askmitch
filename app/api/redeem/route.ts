@@ -61,7 +61,7 @@ export async function POST(request: Request) {
   // (org_id, voucher_code) index; normalizeVoucherInput handled the casing.
   const { data: lead, error } = await supabase
     .from("leads")
-    .select("id, name, gadget, gadget_other, expires_at, redeemed_at")
+    .select("id, name, gadget, gadgets, gadget_other, expires_at, redeemed_at")
     .eq("org_id", orgId)
     .eq("voucher_code", canonical)
     .maybeSingle();
@@ -91,7 +91,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       state: "valid",
       name: lead.name,
-      gadget: lead.gadget,
+      // fallback covers rows written by a pre-multiselect deploy (0002 note)
+      gadgets: lead.gadgets ?? [lead.gadget],
       gadget_other: lead.gadget_other,
     });
   }
