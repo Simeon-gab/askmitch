@@ -7,13 +7,14 @@
 
 ---
 
-## The three pages
+## The four pages
 
 | Page | Address | Who uses it |
 |---|---|---|
 | Guest registration | `<URL>/` (QR code points here) | Guests on their own phones |
 | Kiosk | `<URL>/kiosk` | The tablet at the entrance |
 | Voucher check | `<URL>/redeem` | Staff at the counter |
+| Scan-to-register | `<URL>/qr` | Staff — open it and hold your screen out; the guest scans it with their camera and lands on the registration form |
 
 ## Kiosk tablet — set up in the morning
 

@@ -364,6 +364,12 @@ canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 .pill.warn{border:1.5px solid rgba(255,255,255,.3);color:var(--muted)}
 .pill.err{border:1.5px solid rgba(237,28,36,.55);color:var(--red-soft)}
 
+/* /qr — on-the-spot registration code (staff holds the screen out) */
+.qr-board{background:#fff;border-radius:18px;padding:16px;max-width:300px}
+.qr-board svg{display:block;width:100%;height:auto}
+.qr-alt{color:var(--muted);font-size:14px;font-weight:600;margin-top:16px}
+.qr-alt b{color:var(--white)}
+
 /* ---------- admin surfaces: theme shell (/admin + /admin/login) ---------- */
 /* The owner area gets its own light/dark switch. Guest and staff surfaces
    stay dark — these tokens only resolve inside .admin-root, and the light
