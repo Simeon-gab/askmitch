@@ -1,10 +1,13 @@
 "use client";
 
 // Staff redemption page (docs/ARCHITECTURE.md "Data flow: redemption").
-// PIN entered once per browser session (sessionStorage), sent with every
-// request; server does the constant-time comparison. Four result states
-// render distinctly; marking as used is a second, explicit call.
-import { useEffect, useState } from "react";
+// PIN entered once per device (localStorage — voucher QR scans open a fresh
+// tab each time, and sessionStorage would demand the PIN on every scan),
+// sent with every request; server does the constant-time comparison. Four
+// result states render distinctly; marking as used is a second, explicit
+// call. Arriving with ?code= (from a scanned voucher QR) prefills the code
+// and checks it automatically once the station is unlocked.
+import { useEffect, useRef, useState } from "react";
 import { LogoMark } from "@/components/screens/shared";
 import { GADGET_LABELS } from "@/lib/options";
 
@@ -66,9 +69,15 @@ export default function RedeemPage() {
   const [marking, setMarking] = useState(false);
   const [result, setResult] = useState<RedeemResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const scanPending = useRef(false);
 
   useEffect(() => {
-    setPin(window.sessionStorage.getItem(PIN_STORAGE_KEY));
+    setPin(window.localStorage.getItem(PIN_STORAGE_KEY));
+    const scanned = new URLSearchParams(window.location.search).get("code");
+    if (scanned) {
+      setCode(scanned);
+      scanPending.current = true;
+    }
   }, []);
 
   const unlock = async () => {
@@ -81,7 +90,7 @@ export default function RedeemPage() {
       if (probe.status === 401) {
         setPinError("Wrong PIN — try again.");
       } else if (probe.status === 200) {
-        window.sessionStorage.setItem(PIN_STORAGE_KEY, pinInput.trim());
+        window.localStorage.setItem(PIN_STORAGE_KEY, pinInput.trim());
         setPin(pinInput.trim());
         setPinInput("");
       } else {
@@ -94,7 +103,7 @@ export default function RedeemPage() {
   };
 
   const lock = () => {
-    window.sessionStorage.removeItem(PIN_STORAGE_KEY);
+    window.localStorage.removeItem(PIN_STORAGE_KEY);
     setPin(null);
     setResult(null);
     setCode("");
@@ -121,6 +130,14 @@ export default function RedeemPage() {
     }
     setChecking(false);
   };
+
+  // A scanned voucher QR checks itself as soon as the station is unlocked.
+  useEffect(() => {
+    if (!scanPending.current || !pin || code.trim() === "") return;
+    scanPending.current = false;
+    void check();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pin, code]);
 
   const markUsed = async () => {
     if (!pin || marking || !result || result.state !== "valid") return;

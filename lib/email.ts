@@ -82,11 +82,20 @@ export async function sendVoucherEmail(
 
 // Table-based layout, all CSS inline (email-client reality; tested target is
 // Gmail mobile). Anton isn't email-safe — bold condensed system stack instead.
-function voucherEmailHtml({ firstName, code, expiresAt }: VoucherEmailArgs): string {
+// Exported so scripts can render a preview without sending.
+export function voucherEmailHtml({ firstName, code, expiresAt }: VoucherEmailArgs): string {
   const expiry = formatExpiry(expiresAt);
   const displayFont =
     "'Arial Black', 'Arial Bold', Arial, Helvetica, sans-serif";
   const bodyFont = "Arial, Helvetica, sans-serif";
+  // Scannable voucher QR (links to /redeem?code=...). Needs an absolute URL —
+  // if APP_URL isn't set the email simply omits the image; the text code
+  // always works on its own.
+  const appUrl = process.env.APP_URL?.replace(/\/$/, "");
+  const qrBlock = appUrl
+    ? `<img src="${appUrl}/api/qr/${encodeURIComponent(code)}.png" width="132" height="132" alt="QR code for voucher ${escapeHtml(code)}" style="display:block;margin:16px auto 0;border:0;border-radius:8px;background-color:#ffffff;" />
+                  <div style="font-family:${bodyFont};font-size:12px;color:#666666;padding-top:8px;">Staff can scan this at the counter</div>`
+    : "";
   return `<!DOCTYPE html>
 <html lang="en">
 <body style="margin:0;padding:0;background-color:#f4f4f4;">
@@ -120,6 +129,7 @@ function voucherEmailHtml({ firstName, code, expiresAt }: VoucherEmailArgs): str
                   <div style="font-family:${bodyFont};font-size:10px;letter-spacing:3px;color:#B8121A;font-weight:bold;padding-top:14px;">YOUR VOUCHER CODE</div>
                   <div style="font-family:${displayFont};font-size:34px;letter-spacing:4px;color:${BLACK};padding-top:8px;">${escapeHtml(code)}</div>
                   <div style="font-family:${bodyFont};font-size:13px;color:#666666;padding-top:12px;">Valid until <strong>${expiry}</strong></div>
+                  ${qrBlock}
                 </td>
               </tr>
             </table>
