@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Browser-tab icon: the LogoMark badge (shared.tsx) on a dark disc so it
+       reads on light and dark tab strips alike. -->
+  <circle cx="50" cy="50" r="50" fill="#0C0C0C"/>
+  <circle cx="50" cy="50" r="40" fill="none" stroke="#3A3A3A" stroke-width="9" stroke-dasharray="188 63" stroke-dashoffset="-30" transform="rotate(-90 50 50)"/>
+  <path d="M50 18 L78 74 L61 74 L50 51 L39 74 L22 74 Z" fill="#ED1C24"/>
+</svg>
